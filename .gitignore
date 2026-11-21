@@ -1,0 +1,13 @@
+# Derleme çıktıları (yeniden üretilebilir)
+desktop/node_modules/
+desktop/dist/
+desktop/app/index.html
+desktop/app/icon.png
+desktop/build/icon.ico
+android/build/
+android/assets/index.html
+*.apk
+*.zip
+# İmza anahtarı: gizli tutun, ayrıca yedekleyin
+*.keystore
+*.idsig
