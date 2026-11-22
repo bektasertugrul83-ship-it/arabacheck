@@ -120,10 +120,7 @@ public class MainActivity extends Activity {
                 Uri u = req.getUrl();
                 String scheme = u.getScheme();
                 if (HOST.equals(u.getHost())) return false;
-                // İlan siteleri (sahibinden, arabam…) telefonun tarayıcısında / uygulamasında açılsın.
-                try {
-                    startActivity(new Intent(Intent.ACTION_VIEW, u));
-                } catch (ActivityNotFoundException ignored) { }
+                openInBrowser(u);
                 return true;
             }
 
@@ -177,6 +174,40 @@ public class MainActivity extends Activity {
 
         if (savedInstanceState != null) web.restoreState(savedInstanceState);
         else web.loadUrl(START_URL);
+    }
+
+    /**
+     * İlan linklerini sahibinden/arabam uygulamasında değil, telefonun tarayıcısında aç:
+     * bu uygulamalar linki yakalayıp filtreleri (model, yıl, km, fiyat) yok sayıyor ve ana sayfayı açıyor.
+     */
+    private void openInBrowser(Uri u) {
+        Intent i = new Intent(Intent.ACTION_VIEW, u);
+        i.addCategory(Intent.CATEGORY_BROWSABLE);
+        String browser = defaultBrowser();
+        if (browser != null) i.setPackage(browser);
+        try {
+            startActivity(i);
+        } catch (ActivityNotFoundException e) {
+            try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (ActivityNotFoundException ignored) { }
+        }
+    }
+
+    /** Varsayılan tarayıcının paket adı (hiçbir uygulamanın sahiplenmediği bir adresle bulunur). */
+    private String defaultBrowser() {
+        android.content.pm.PackageManager pm = getPackageManager();
+        Intent probe = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.example.com/"));
+        probe.addCategory(Intent.CATEGORY_BROWSABLE);
+        android.content.pm.ResolveInfo ri = pm.resolveActivity(probe, android.content.pm.PackageManager.MATCH_DEFAULT_ONLY);
+        if (ri != null && ri.activityInfo != null && !"android".equals(ri.activityInfo.packageName)
+                && !ri.activityInfo.packageName.equals(getPackageName())) {
+            return ri.activityInfo.packageName;
+        }
+        java.util.List<android.content.pm.ResolveInfo> all = pm.queryIntentActivities(probe, 0);
+        for (android.content.pm.ResolveInfo r : all) {
+            String pkg = r.activityInfo.packageName;
+            if (!pkg.equals(getPackageName())) return pkg;
+        }
+        return null;
     }
 
     @Override
