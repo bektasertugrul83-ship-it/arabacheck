@@ -64,6 +64,9 @@ input,select{font-family:inherit}
 .steps span{padding:6px 11px;border-radius:999px;background:var(--paper)}
 .steps span.on{background:var(--n900);color:#fff}
 .fc-body{padding:28px 32px 32px}
+.fc-actions{display:flex;align-items:center;gap:12px}
+.btn-reset{display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 14px;border-radius:11px;border:1.5px solid var(--line);background:#fff;font-size:13.5px;font-weight:700;color:var(--ink2);white-space:nowrap}
+.btn-reset:hover,.btn-reset:active{border-color:var(--bad);color:var(--bad)}
 .sec-t{font-size:12px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);margin:6px 0 14px;display:flex;align-items:center;gap:10px}
 .sec-t:after{content:"";flex:1;height:1px;background:var(--line)}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px 18px;margin-bottom:26px}
@@ -404,7 +407,7 @@ html.app .link-box input{font-size:14.5px;padding:10px 4px}
 html.app .link-box .btn-w{height:42px!important;font-size:13.5px;padding:0 16px}
 html.app .link-hint{text-align:left;margin-top:8px;font-size:12.5px}
 html.app .form-card{margin-top:-40px;border-radius:20px}
-html.app .fc-head{padding:18px 18px 14px}
+html.app .fc-head{padding:18px 18px 14px;flex-wrap:nowrap;align-items:flex-start}
 html.app .fc-head h2{font-size:18px}
 html.app .fc-body{padding:18px}
 html.app .fc-foot{padding:16px 18px;flex-direction:column;align-items:stretch}
@@ -538,7 +541,10 @@ html.app #view-history:not(.hidden){display:block;padding-top:14px}
           <h2>Araç bilgileri</h2>
           <p>Ne kadar çok bilgi girerseniz analiz o kadar isabetli olur.</p>
         </div>
-        <div class="steps"><span class="on">1 · Bilgiler</span><span>2 · Analiz</span><span>3 · Rapor</span></div>
+        <div class="fc-actions">
+          <div class="steps"><span class="on">1 · Bilgiler</span><span>2 · Analiz</span><span>3 · Rapor</span></div>
+          <button type="button" class="btn-reset" id="btn-reset"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Sıfırla</button>
+        </div>
       </div>
       <div class="fc-body">
         <div class="sec-t">Temel bilgiler</div>
@@ -2022,6 +2028,16 @@ function show(v){
 }
 $$("[data-home]").forEach(b=>b.addEventListener("click", ()=>{ resetForm(); goHome(); }));
 $("#btn-edit").addEventListener("click", goHome);
+$("#btn-reset").addEventListener("click", ()=>{
+  resetForm();
+  $("#form-err").textContent = "";
+  $$("#car-form .err, #car-form .filled").forEach(el=>el.classList.remove("err","filled"));
+  $("#paste-box").classList.remove("txt");
+  const tg = $(".pb-toggle"); if (tg) tg.textContent = "Metin yapıştırarak doldur";
+  fillModels();
+  toast("Bilgiler sıfırlandı");
+  $("#brand").scrollIntoView({behavior:"smooth", block:"center"});
+});
 function goHome(){ show("home"); if(location.hash) history.replaceState(null,"",location.pathname+location.search); }
 function resetForm(){ $("#car-form").reset(); $("#paste").value=""; $("#pb-msg").textContent=""; $("#pb-open").classList.add("hidden"); setSeg("fuel","Benzin"); setSeg("gear","Manuel"); $("#owners").value="2"; $("#link").value=""; $("#link-hint").className="link-hint"; $("#link-hint").textContent="Linkteki marka, model ve yıl bilgisi otomatik algılanır — kalan bilgileri aşağıdan tamamlayın."; }
 
