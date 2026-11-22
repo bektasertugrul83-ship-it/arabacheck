@@ -1805,11 +1805,11 @@ function renderDeal(r){
   // sahibinden: kategori adresi + yıl (a5) ve km (a4) aralığı + fiyat üst sınırı; metin araması yok (başlıkta geçmeyen kelime sonucu sıfırlıyordu)
   const sahCat = (isSuv ? "arazi-suv-pickup-" : isVan ? "minivan-van_panelvan-" : "") + `${slug(r.brand)}-${slug(r.model)}`;
   const sah = `https://www.sahibinden.com/${sahCat}?a5_min=${y}&a5_max=${y}&a4_max=${kmMax}&price_max=${max}`;
-  const gq = `${r.brand} ${r.model} ${y} ${c.fuel.toLocaleLowerCase('tr-TR')} ${c.gear.toLocaleLowerCase('tr-TR')} satılık site:sahibinden.com OR site:arabam.com`;
+  const gq = `${r.brand} ${r.model}${pkg ? " " + pkg : ""} ${y} ${c.fuel.toLocaleLowerCase('tr-TR')} ${c.gear.toLocaleLowerCase('tr-TR')} satılık site:sahibinden.com OR site:arabam.com`;
   const ggl = `https://www.google.com/search?q=${encodeURIComponent(gq)}`;
   const ic = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   const chips = [`${r.brand} ${r.model}`, `${y} model`, c.fuel, c.gear, `≤ ${fmt(kmMax)} km`, `≤ ${tlShort(max)}`];
-  $("#r-deal-spec").innerHTML = `<span class="ds-l">Aramada</span>` + chips.map(t=>`<span class="ds">${esc(t)}</span>`).join("") + (pkg ? `<span class="ds warn">Paket (${esc(pkg)}) sitelerde filtrelenemiyor — ilan başlığında kontrol edin</span>` : "");
+  $("#r-deal-spec").innerHTML = `<span class="ds-l">Aramada</span>` + chips.map(t=>`<span class="ds">${esc(t)}</span>`).join("") ;
   dealCtx = {key:[slug(r.brand),slug(r.model),slug(pkg),y,c.fuel,c.gear,Math.round(max/50000)].join("|"), max, mid:m.mid, min:m.min,
     sites:[{id:"arabam",name:"arabam.com",url:arb},{id:"sahibinden",name:"sahibinden.com",url:sah},{id:"google",name:"Google",url:ggl}], ic, asked:null};
   renderDealLinks();
