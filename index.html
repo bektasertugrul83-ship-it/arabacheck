@@ -1099,8 +1099,10 @@ function parsePaint(L){
       // Lejant satırı ("Orijinal Lokal Boyalı Boyalı Değişmiş…") veri değildir
       if (statusWords >= 2){ group = null; continue; }
       // Grup başlığı: "Boyalı Parçalar", "Değişen Parçalar:", "Lokal Boyalı"
-      const h = t.match(/^(lokal boyali|boyali|degismis|degisen|orijinal)( parca(lar)?)?\s*:?\s*$/);
+      // Başındaki renk karesi yazı tanımada "E", "EH", "■" gibi okunabilir; 1-3 karakterlik gürültüyü atla
+      const h = t.match(/^(?:[^a-z0-9\s]+\s*|[a-z]{1,3}\s+)?(lokal boyali|boyali|degismis|degisen|orijinal|belirtilmemis)( parca(lar)?)?\s*:?\s*$/);
       if (h){ group = paintStatus(h[1]); groupLeft = 14; continue; }
+      if (/ozellik|aciklama|guvenlik|donanim|konum/.test(t)){ group = null; continue; }
       if (group && --groupLeft <= 0) group = null;
       continue;
     }
