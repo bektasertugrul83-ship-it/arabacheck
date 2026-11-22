@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ArabaCheck — İkinci El Araç Analizi</title>
+<script>try{if(/[?&]desktop=1\b/.test(location.search)||sessionStorage.getItem("ac:desktop"))document.documentElement.classList.add("desktop"),sessionStorage.setItem("ac:desktop","1")}catch(e){}</script>
 <script>try{if(/[?&]app=1\b/.test(location.search)||window.ArabaCheckApp||sessionStorage.getItem("ac:app"))document.documentElement.classList.add("app"),sessionStorage.setItem("ac:app","1")}catch(e){if(window.ArabaCheckApp)document.documentElement.classList.add("app")}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -463,6 +464,45 @@ html.app #view-history:not(.hidden){display:block;padding-top:14px}
 .hi .hi-del{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--ink3)}
 .hist-empty{text-align:center;padding:60px 20px;color:var(--ink3)}
 .hist-empty b{display:block;color:var(--ink);font-size:17px;margin:14px 0 4px}
+/* ---- Masaüstü uygulaması (geniş pencere): uygulama çubukları kalır, düzen bilgisayara göre ---- */
+@media (min-width:761px){
+  html.app.desktop body{padding-bottom:104px}
+  html.app.desktop .appbar{padding:0 16px}
+  html.app.desktop .tabbar{left:50%;right:auto;bottom:18px;transform:translateX(-50%);width:440px;height:66px;border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
+  html.app.desktop .toast{bottom:100px}
+  html.app.desktop .wrap{padding:0 24px}
+  html.app.desktop .hero{padding-bottom:70px}
+  html.app.desktop .hero-inner{max-width:780px;margin:0 auto;padding-top:26px}
+  html.app.desktop .hero h1{font-size:30px}
+  html.app.desktop .form-card{margin-top:-46px}
+  html.app.desktop .fc-head{padding:24px 32px 18px}
+  html.app.desktop .fc-body{padding:26px 32px 30px}
+  html.app.desktop .fc-foot{padding:20px 32px;flex-direction:row;align-items:center}
+  html.app.desktop .btn-main{width:auto}
+  html.app.desktop .grid{grid-template-columns:repeat(4,1fr);gap:16px 18px}
+  html.app.desktop .f.s2{grid-column:span 2}
+  html.app.desktop .res-hero{padding-bottom:110px}
+  html.app.desktop .res-top{grid-template-columns:1fr auto;justify-items:start;gap:40px;padding-top:24px}
+  html.app.desktop .res-top h1{font-size:38px}
+  html.app.desktop .res-top .gauge{order:0;width:210px;height:210px}
+  html.app.desktop .gauge .num b{font-size:56px}
+  html.app.desktop .kpis{grid-template-columns:repeat(4,1fr);gap:16px;margin-top:-80px}
+  html.app.desktop .kpi{padding:20px 22px}
+  html.app.desktop .kpi .v{font-size:24px;white-space:nowrap}
+  html.app.desktop .kpi .k{font-size:12px}
+  html.app.desktop .card{padding:26px}
+  html.app.desktop .cols{grid-template-columns:1.5fr 1fr;gap:20px}
+  html.app.desktop .subs{grid-template-columns:repeat(5,1fr);gap:12px}
+  html.app.desktop .price-rows,html.app.desktop .deal-top,html.app.desktop .cost-in{grid-template-columns:repeat(3,1fr)}
+  html.app.desktop .alts{grid-template-columns:repeat(4,1fr)}
+  html.app.desktop .cta-row{display:flex;flex-wrap:wrap;gap:12px}
+  html.app.desktop .cta-row .btn-sec{padding:0 22px;height:50px;font-size:14.5px}
+  html.app.desktop .cmp{min-width:560px}
+  html.app.desktop .cmp th,html.app.desktop .cmp td{padding:12px 14px;font-size:14px}
+  html.app.desktop .cmp tbody th{width:170px}
+  html.app.desktop #view-history .wrap{max-width:860px}
+  html.app.desktop #view-compare .res-hero .verdict{padding-top:20px}
+}
 </style>
 </head>
 <body>
@@ -1417,6 +1457,15 @@ async function fillFromImages(files){
   }
 }
 $("#ocr-file").addEventListener("change", e => fillFromImages(e.target.files));
+// Panodaki ekran görüntüsünü yapıştır (Windows: Win+Shift+S → Ctrl+V)
+document.addEventListener("paste", e => {
+  const files = [...(e.clipboardData && e.clipboardData.files || [])].filter(f => /^image\//.test(f.type));
+  if (!files.length) return;
+  e.preventDefault();
+  if ($("#view-home").classList.contains("hidden")){ resetForm(); goHome(); }
+  $("#paste-box").scrollIntoView({behavior:"smooth", block:"center"});
+  fillFromImages(files);
+});
 $("#paste-box").addEventListener("dragover", e => { if ([...e.dataTransfer.items].some(x => x.kind === "file")) e.preventDefault(); });
 $("#paste-box").addEventListener("drop", e => { if (e.dataTransfer.files.length){ e.preventDefault(); fillFromImages(e.dataTransfer.files); } });
 
@@ -2179,7 +2228,7 @@ function histUpsert(r){
 }
 function renderHistory(){
   const l = histLoad();
-  $("#hist-count").textContent = l.length ? `${l.length} analiz · bu telefonda saklanır` : "";
+  $("#hist-count").textContent = l.length ? `${l.length} analiz · bu ${document.documentElement.classList.contains("desktop") ? "bilgisayarda" : "telefonda"} saklanır` : "";
   $("#hist-clear").classList.toggle("hidden", !l.length);
   $("#hist-list").innerHTML = l.length ? l.map((x,i)=>{
     const c = x.car||{}, dt = new Date(x.at).toLocaleDateString('tr-TR',{day:'numeric',month:'short'});
@@ -2226,7 +2275,8 @@ if (APP){
   $("#ab-back").addEventListener("click", ()=>{ if (history.length > 1) history.back(); else goHome(); });
   $("#ab-share").addEventListener("click", ()=>{
     if (!current) return; const txt = summaryText();
-    if (window.ArabaCheckApp && ArabaCheckApp.share) ArabaCheckApp.share(txt);
+    if (document.documentElement.classList.contains("desktop")) $("#btn-copy").click();
+    else if (window.ArabaCheckApp && ArabaCheckApp.share) ArabaCheckApp.share(txt);
     else if (navigator.share) navigator.share({text:txt}).catch(()=>{});
     else $("#btn-copy").click();
   });
@@ -2239,8 +2289,10 @@ if (APP){
   });
   // Klavye açıkken alt sekme çubuğunu gizle
   const isField = el => el && (el.tagName==="TEXTAREA" || el.tagName==="SELECT" || (el.tagName==="INPUT" && !/checkbox|radio|file|button|submit/.test(el.type)));
+  if (!document.documentElement.classList.contains("desktop"))
   document.addEventListener("focusin", e=>{ if (isField(e.target)) document.documentElement.classList.add("kb"); });
   document.addEventListener("focusout", ()=>setTimeout(()=>{ if (!isField(document.activeElement)) document.documentElement.classList.remove("kb"); }, 60));
+  if (document.documentElement.classList.contains("desktop")){ $("#ab-share").setAttribute("aria-label","Özeti kopyala"); $("#ab-share").title = "Özeti kopyala"; $("#ab-new").title = "Yeni analiz"; }
   appChrome("home");
 }
 

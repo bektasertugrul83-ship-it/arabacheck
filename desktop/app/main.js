@@ -15,7 +15,8 @@ function createWindow() {
     webPreferences: { contextIsolation: true, sandbox: true, spellcheck: false },
   });
   win.once("ready-to-show", () => win.show());
-  win.loadFile(path.join(__dirname, "index.html"));
+  // Uygulama görünümü (sekmeler, geçmiş) + masaüstü düzeni
+  win.loadFile(path.join(__dirname, "index.html"), { query: { app: "1", desktop: "1" } });
 
   // İlan siteleri (sahibinden, arabam…) varsayılan tarayıcıda açılsın.
   const isExternal = (url) => /^https?:/i.test(url);
@@ -30,6 +31,9 @@ function createWindow() {
 
 Menu.setApplicationMenu(Menu.buildFromTemplate([
   { label: "ArabaCheck", submenu: [
+    { label: "Yeni analiz", accelerator: "CmdOrCtrl+N", click: (_, w) => w && w.webContents.executeJavaScript('document.querySelector("#ab-new") && (resetForm(), goHome())') },
+    { label: "Geçmiş", accelerator: "CmdOrCtrl+H", click: (_, w) => w && w.webContents.executeJavaScript('document.querySelector("[data-tab=history]").click()') },
+    { type: "separator" },
     { label: "Yeniden yükle", role: "reload" },
     { label: "Tam ekran", role: "togglefullscreen" },
     { type: "separator" },
