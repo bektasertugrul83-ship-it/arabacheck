@@ -121,8 +121,12 @@ public class MainActivity extends Activity {
                 String scheme = u.getScheme();
                 if (HOST.equals(u.getHost())) return false;
                 // Linki Android'e bırak: sahibinden / arabam uygulaması yüklüyse onda, değilse tarayıcıda açılır
+                // Ayrı görevde aç: son uygulamalar ekranında ArabaCheck ayrı kart olarak kalsın,
+                // kullanıcı geri tuşuyla sahibinden/arabam'dan çıkmadan ArabaCheck'e dönebilsin
+                Intent ext = new Intent(Intent.ACTION_VIEW, u);
+                ext.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 try {
-                    startActivity(new Intent(Intent.ACTION_VIEW, u));
+                    startActivity(ext);
                 } catch (ActivityNotFoundException e) {
                     openInBrowser(u);
                 }
@@ -185,6 +189,7 @@ public class MainActivity extends Activity {
     private void openInBrowser(Uri u) {
         Intent i = new Intent(Intent.ACTION_VIEW, u);
         i.addCategory(Intent.CATEGORY_BROWSABLE);
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         String browser = defaultBrowser();
         if (browser != null) i.setPackage(browser);
         try {
