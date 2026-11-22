@@ -690,7 +690,7 @@ html.app #view-history:not(.hidden){display:block;padding-top:14px}
       <div class="deal-top" id="r-deal-top"></div>
       <div class="deal-spec" id="r-deal-spec"></div>
       <div class="deal-links" id="r-deal-links"></div>
-      <p class="deal-note">Linkler; marka, model, paket, yıl, yakıt ve vites aynı kalacak, km ilandakinden fazla olmayacak şekilde hedef fiyatın altındaki ilanları açar. Hasar durumu sitelerde filtrelenemiyor, ilan detayında kontrol edin. Siteler otomatik okumaya izin vermediği için ilanları ArabaCheck içinde listeleyemiyoruz; filtreleri sitede kontrol edin. Beğendiğiniz ilanı buraya yapıştırıp analiz ettirin ve karşılaştırmaya ekleyin.</p>
+      <p class="deal-note">Linkler aynı marka, model ve yıldaki, km'si ilandakinden fazla olmayan ve hedef fiyatın altındaki ilanları açar (arabam.com'da yakıt ve vites de filtrelenir; sahibinden'de sitede seçin). Paket ve hasar durumu sitelerde filtrelenemiyor, ilan detayında kontrol edin. Siteler otomatik okumaya izin vermediği için ilanları ArabaCheck içinde listeleyemiyoruz; filtreleri sitede kontrol edin. Beğendiğiniz ilanı buraya yapıştırıp analiz ettirin ve karşılaştırmaya ekleyin.</p>
       <div id="r-alts"></div>
     </div>
 
@@ -1788,24 +1788,28 @@ function renderDeal(r){
     <div class="pr"><div>Pazarlıkta ilk teklif</div><b>${tl(m.min)}</b></div>
     <div class="pr"><div>${c.price ? "İlana göre tasarruf" : "Piyasa üst sınırı"}</div><b class="${c.price && c.price>m.mid ? "pos":""}">${c.price ? (c.price>m.mid ? tl(c.price-m.mid) : "—") : tl(m.max)}</b></div>`;
   // Aracın TÜM özellikleri sabit: marka, model, paket, yıl, yakıt, vites; km ilandakinden fazla değil
-  const y = c.year, max = Math.round(m.mid/1000)*1000;
+  // Üst sınır: piyasa ortası; ilan zaten daha ucuzsa ilanın kendi fiyatı (daha pahalı ilan "daha uygun" değildir)
+  const y = c.year, max = Math.round(Math.min(m.mid, c.price > 0 ? c.price : Infinity)/1000)*1000;
   const kmMax = Math.ceil(Math.max(c.km*1.1, 10000)/5000)*5000;
-  const gearS = {Otomatik:"otomatik", Manuel:"manuel", "Yarı Otomatik":"yari-otomatik"}[c.gear];
-  const fuelS = {Benzin:"benzin", Dizel:"dizel", LPG:"lpg", Hibrit:"hibrit", Elektrik:"elektrik"}[c.fuel];
+  // arabam.com adresleri: /ikinci-el/{otomobil|arazi-suv-pick-up}/{marka}-{seri}-{yakıt}-{vites}?minyear=&maxyear=&maxprice=&maxkm=
+  // (ör. alfa-romeo-giulietta-benzin-otomatik, ...-dizel-duz; filtre adları küçük harf)
+  const gearA = {Otomatik:"otomatik", Manuel:"duz", "Yarı Otomatik":"yari-otomatik"}[c.gear];
+  const fuelA = {Benzin:"benzin", Dizel:"dizel", LPG:"lpg", Hibrit:"hibrit", Elektrik:"elektrik"}[c.fuel];
   const pkg = (c.engine||"").trim();
-  const isSuv = /^(x\d|q\d|xc\d|gl[a-z]|t-roc|t-cross|tiguan|kodiaq|karoq|kamiq|arona|ateca|formentor|duster|captur|kadjar|austral|qashqai|juke|x-trail|navara|cx-|c-hr|rav4|hilux|hr-v|cr-v|bayon|tucson|kona|santa fe|sportage|stonic|sorento|kuga|puma|ranger|mokka|crossland|grandland|2008|3008|5008|c5 aircross|t10x|model y|tiggo|omoda|atto|seal u|zs|hs|vitara|s-cross|l200|asx|outlander|renegade|compass|avenger)/i.test(r.model);
-  const isVan = /^(doblo|fiorino|caddy|transporter|vito|courier|connect|combo|rifter|partner|berlingo|proace)/i.test(r.model);
-  const arbPath = [slug(r.brand), slug(r.model), pkg ? slug(pkg) : "", gearS].filter(Boolean).join("-");
-  const arbQs = `minYear=${y}&maxYear=${y}&maxPrice=${max}&maxKm=${kmMax}`;
-  const arb = isVan ? `https://www.arabam.com/ikinci-el?searchText=${encodeURIComponent([r.brand,r.model,pkg,c.gear,c.fuel].filter(Boolean).join(" "))}&${arbQs}`
-    : `https://www.arabam.com/ikinci-el/${isSuv?"arazi-suv-pick-up":"otomobil"}/${arbPath}?${arbQs}`;
-  const sahQ = [pkg, c.gear, c.fuel].filter(Boolean).join(" ");
-  const sah = `https://www.sahibinden.com/${slug(r.brand)}-${slug(r.model)}?a5_min=${y}&a5_max=${y}&a4_max=${kmMax}&price_max=${max}&query_text=${encodeURIComponent(sahQ)}`;
-  const gq = `"${r.brand} ${r.model}"${pkg?` "${pkg}"`:""} ${y} ${c.gear.toLocaleLowerCase('tr-TR')} ${c.fuel.toLocaleLowerCase('tr-TR')} satılık (site:sahibinden.com OR site:arabam.com)`;
+  const isSuv = /^(x\d|q\d|xc\d|gl[a-z]|g serisi|eq[ab]|t-roc|t-cross|tiguan|touareg|id\.4|kodiaq|karoq|kamiq|elroq|arona|ateca|formentor|duster|captur|kadjar|austral|qashqai|juke|x-trail|navara|cx-|c-hr|rav4|hilux|land cruiser|yaris cross|hr-v|cr-v|zr-v|bayon|tucson|ix35|kona|santa fe|ioniq 5|sportage|stonic|sorento|niro|ev6|kuga|puma|ranger|mokka|crossland|grandland|2008|3008|5008|c3 aircross|c5 aircross|ds 7|t10x|model y|tiggo|omoda|atto|seal u|zs|hs|vitara|s-cross|l200|asx|outlander|d-max|renegade|compass|avenger|wrangler|grand cherokee|cayenne|macan|range rover|discovery|defender|freelander|f-pace|e-pace|i-pace|stelvio|tonale|levante|grecale|countryman|ux|nx|rx|lbx|xv|forester|outback|korando|tivoli|rexton|torres)/i.test(r.model);
+  const isVan = /^(doblo|fiorino|caddy|transporter|custom|vito|v serisi|sprinter|courier|connect|combo|rifter|partner|berlingo|proace)/i.test(r.model);
+  // arabam Mercedes serilerini tek harfle yazar (mercedes-benz-c, -e, -s); diğerleri seri adının kendisi
+  const arbModel = /^Mercedes/.test(r.brand) ? slug(r.model.replace(/\s*Serisi$/i, "")) : slug(r.model);
+  const arbQs = `minyear=${y}&maxyear=${y}&maxprice=${max}&maxkm=${kmMax}`;
+  const arb = `https://www.arabam.com/ikinci-el/${isVan ? "minivan-van_panelvan" : isSuv ? "arazi-suv-pick-up" : "otomobil"}/${[slug(r.brand), arbModel, fuelA, gearA].join("-")}?${arbQs}`;
+  // sahibinden: kategori adresi + yıl (a5) ve km (a4) aralığı + fiyat üst sınırı; metin araması yok (başlıkta geçmeyen kelime sonucu sıfırlıyordu)
+  const sahCat = (isSuv ? "arazi-suv-pickup-" : isVan ? "minivan-van_panelvan-" : "") + `${slug(r.brand)}-${slug(r.model)}`;
+  const sah = `https://www.sahibinden.com/${sahCat}?a5_min=${y}&a5_max=${y}&a4_max=${kmMax}&price_max=${max}`;
+  const gq = `${r.brand} ${r.model} ${y} ${c.fuel.toLocaleLowerCase('tr-TR')} ${c.gear.toLocaleLowerCase('tr-TR')} satılık site:sahibinden.com OR site:arabam.com`;
   const ggl = `https://www.google.com/search?q=${encodeURIComponent(gq)}`;
   const ic = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-  const chips = [`${r.brand} ${r.model}`, pkg || null, `${y} model`, c.fuel, c.gear, `≤ ${fmt(kmMax)} km`, `≤ ${tlShort(max)}`].filter(Boolean);
-  $("#r-deal-spec").innerHTML = `<span class="ds-l">Aynı kalan özellikler</span>` + chips.map(t=>`<span class="ds">${esc(t)}</span>`).join("") + (pkg ? "" : `<span class="ds warn">Paket girilmedi — "Motor / Paket" alanını doldurursanız arama o pakete daraltılır</span>`);
+  const chips = [`${r.brand} ${r.model}`, `${y} model`, c.fuel, c.gear, `≤ ${fmt(kmMax)} km`, `≤ ${tlShort(max)}`];
+  $("#r-deal-spec").innerHTML = `<span class="ds-l">Aramada</span>` + chips.map(t=>`<span class="ds">${esc(t)}</span>`).join("") + (pkg ? `<span class="ds warn">Paket (${esc(pkg)}) sitelerde filtrelenemiyor — ilan başlığında kontrol edin</span>` : "");
   dealCtx = {key:[slug(r.brand),slug(r.model),slug(pkg),y,c.fuel,c.gear,Math.round(max/50000)].join("|"), max, mid:m.mid, min:m.min,
     sites:[{id:"arabam",name:"arabam.com",url:arb},{id:"sahibinden",name:"sahibinden.com",url:sah},{id:"google",name:"Google",url:ggl}], ic, asked:null};
   renderDealLinks();
