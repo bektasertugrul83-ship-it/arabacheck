@@ -829,7 +829,7 @@ const DB = {
   "Skoda":{grp:"vag",models:{"Fabia":[1700000,74,"e"],"Octavia":[2600000,75,"m"],"Superb":[4000000,74,"m"],"Kamiq":[2100000,73,"m"],"Karoq":[2600000,73,"m"],"Kodiaq":[3300000,73,"m"],"Scala":[1950000,73,"m"],"Rapid":[1450000,72,"e"],"Elroq":[2700000,72,"m"]}},
   "Seat":{grp:"vag",models:{"Ibiza":[1700000,71,"e"],"Leon":[2300000,71,"m"],"Arona":[2000000,71,"m"],"Ateca":[2600000,71,"m"],"Toledo":[1500000,70,"e"]}},
   "Cupra":{grp:"vag",models:{"Formentor":[3200000,70,"p"],"Leon":[2900000,70,"m"],"Born":[2400000,70,"m"]}},
-  "Audi":{grp:"vag",models:{"A1":[2600000,70,"p"],"A3":[3600000,70,"p"],"A4":[5400000,69,"p"],"A5":[6200000,68,"p"],"A6":[8400000,67,"p"],"A7":[11000000,66,"p"],"A8":[16000000,65,"p"],"Q2":[3400000,70,"p"],"Q3":[4400000,70,"p"],"Q4":[4200000,69,"p"],"Q5":[7200000,68,"p"],"Q7":[13000000,66,"p"],"Q8":[16000000,66,"p"],"TT":[4500000,68,"p"],"e-tron":[9000000,67,"p"]}},
+  "Audi":{grp:"vag",models:{"A1":[2600000,70,"p"],"A3":[3600000,70,"p"],"A4":[5400000,69,"p"],"A5":[6200000,68,"p"],"A6":[8400000,67,"p"],"A7":[11000000,66,"p"],"A8":[22000000,65,"p"],"Q2":[3400000,70,"p"],"Q3":[4400000,70,"p"],"Q4":[4200000,69,"p"],"Q5":[7200000,68,"p"],"Q7":[13000000,66,"p"],"Q8":[16000000,66,"p"],"TT":[4500000,68,"p"],"e-tron":[9000000,67,"p"]}},
   "Porsche":{grp:"vag",models:{"Cayenne":[21500000,72,"p"],"Macan":[12000000,72,"p"],"Panamera":[22000000,70,"p"],"911":[20000000,74,"p"],"Taycan":[13000000,70,"p"],"718":[11000000,73,"p"]}},
   "Toyota":{grp:"toyota",models:{"Corolla":[2200000,85,"m"],"Yaris":[1800000,84,"e"],"Yaris Cross":[2100000,84,"e"],"C-HR":[2900000,84,"m"],"Auris":[1750000,83,"m"],"RAV4":[3800000,85,"m"],"Hilux":[3100000,86,"m"],"Camry":[4200000,86,"m"],"Proace City":[1800000,76,"e"],"Land Cruiser":[12000000,86,"p"]}},
   "Lexus":{grp:"toyota",models:{"UX":[4000000,86,"p"],"NX":[6000000,86,"p"],"ES":[5500000,87,"p"],"RX":[9000000,86,"p"],"LBX":[3000000,86,"p"]}},
@@ -1021,18 +1021,44 @@ const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">
 const NOW_YEAR = 2026;
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2600)}
 
+// Yazı tanımanın sık karıştırdığı harfleri eşitle (Avdi→Audi, Merceces→Mercedes, 0pel→Opel…)
+const ocrKey = s => norm(s).replace(/[-\s.]/g,"").replace(/rn/g,"m").replace(/vv/g,"w").replace(/[v]/g,"u").replace(/0/g,"o").replace(/[1|]/g,"l").replace(/5/g,"s").replace(/8/g,"b");
+function editDist(a, b){
+  if (Math.abs(a.length - b.length) > 2) return 9;
+  const d = Array.from({length:a.length+1}, (_,i)=>[i, ...Array(b.length).fill(0)]);
+  for (let j=1;j<=b.length;j++) d[0][j] = j;
+  for (let i=1;i<=a.length;i++) for (let j=1;j<=b.length;j++)
+    d[i][j] = Math.min(d[i-1][j]+1, d[i][j-1]+1, d[i-1][j-1] + (a[i-1]===b[j-1]?0:1));
+  return d[a.length][b.length];
+}
+// Kısa adlarda (BMW, MG, DS) bulanık eşleşme yapma; uzunlarda 1, çok uzunlarda 2 harf farkına izin ver
+const fuzzyMax = n => n.length >= 8 ? 2 : n.length >= 4 ? 1 : 0;
 function findBrand(name){
   const n = norm(name).replace(/\s*-\s*/g,"-"); if(!n) return null;
   if (BRAND_ALIASES[n]) return BRAND_ALIASES[n];
-  return Object.keys(DB).find(b => norm(b) === n) || Object.keys(DB).find(b => norm(b).startsWith(n) || n.startsWith(norm(b))) || null;
+  const exact = Object.keys(DB).find(b => norm(b) === n) || Object.keys(DB).find(b => norm(b).startsWith(n) || n.startsWith(norm(b)));
+  if (exact) return exact;
+  const k = ocrKey(n); if (!k) return null;
+  const keyed = Object.keys(DB).find(b => ocrKey(b) === k) || Object.entries(BRAND_ALIASES).find(([a]) => ocrKey(a) === k)?.[1];
+  if (keyed) return keyed;
+  let best = null, bd = 9;
+  for (const b of [...Object.keys(DB), ...Object.keys(BRAND_ALIASES)]){ const bk = ocrKey(b), dd = editDist(k, bk); if (dd < bd && dd <= fuzzyMax(bk)){ bd = dd; best = BRAND_ALIASES[b] || b; } }
+  return best;
 }
 function findModel(brand, name){
   if(!brand || !DB[brand]) return null;
   const n = norm(name).replace(/[-\s]/g,""); if(!n) return null;
   const ms = Object.keys(DB[brand].models);
-  return ms.find(m => norm(m).replace(/[-\s]/g,"") === n)
+  const hit = ms.find(m => norm(m).replace(/[-\s]/g,"") === n)
       || ms.filter(m => n.startsWith(norm(m).replace(/[-\s]/g,""))).sort((a,b)=>b.length-a.length)[0]
-      || ms.find(m => norm(m).replace(/[-\s]/g,"").startsWith(n)) || null;
+      || ms.find(m => norm(m).replace(/[-\s]/g,"").startsWith(n));
+  if (hit) return hit;
+  // "Range Rover" marka sanılıp model "Sport/Velar/Evoque" yazıldıysa
+  if (brand==="Land Rover" && !/^rangerover/.test(n)){ const rr = findModel(brand, "Range Rover " + name); if (rr && rr!=="Range Rover") return rr; }
+  const k = ocrKey(n);
+  let best = null, bd = 9;
+  for (const m of ms){ const mk = ocrKey(m), dd = editDist(k, mk); if (dd < bd && dd <= fuzzyMax(mk)){ bd = dd; best = m; } }
+  return best;
 }
 
 /* ================= FORM SETUP ================= */
@@ -1282,7 +1308,8 @@ ${text.slice(0, 14000)}`;
 function applyParsed(o){
   const done = [];
   const mark = sel => { const el = $(sel); el.classList.add("filled"); setTimeout(()=>el.classList.remove("filled"), 4000); };
-  if (o.brand){ $("#brand").value = o.brand; fillModels(); mark("#brand"); done.push("marka"); }
+  if (o.brand){ o.brand = findBrand(o.brand) || o.brand; $("#brand").value = o.brand; fillModels(); mark("#brand"); done.push("marka"); }
+  if (o.model && o.brand && DB[o.brand]){ const fm = findModel(o.brand, o.model); if (fm) o.model = fm; }
   if (o.model){ $("#model").value = o.model; mark("#model"); done.push("model"); }
   if (o.year && $(`#year option[value="${o.year}"], #year option:not([value])`)){ $("#year").value = o.year; if ($("#year").value===String(o.year)){ mark("#year"); done.push("yıl"); } }
   if (o.km!=null){ $("#km").value = fmt(o.km); mark("#km"); done.push("km"); }
@@ -1801,10 +1828,14 @@ function renderDeal(r){
   // arabam Mercedes serilerini tek harfle yazar (mercedes-benz-c, -e, -s); diğerleri seri adının kendisi
   const arbModel = /^Mercedes/.test(r.brand) ? slug(r.model.replace(/\s*Serisi$/i, "")) : slug(r.model);
   const arbQs = `minyear=${y}&maxyear=${y}&maxprice=${max}&maxkm=${kmMax}`;
-  const arb = `https://www.arabam.com/ikinci-el/${isVan ? "minivan-van_panelvan" : isSuv ? "arazi-suv-pick-up" : "otomobil"}/${[slug(r.brand), arbModel, fuelA, gearA].join("-")}?${arbQs}`;
+  const arb = r.known
+    ? `https://www.arabam.com/ikinci-el/${isVan ? "minivan-van_panelvan" : isSuv ? "arazi-suv-pick-up" : "otomobil"}/${[slug(r.brand), arbModel, fuelA, gearA].join("-")}?${arbQs}`
+    : `https://www.arabam.com/ikinci-el?searchText=${encodeURIComponent(r.brand + " " + r.model)}&${arbQs}`;
   // sahibinden: kategori adresi + yıl (a5) ve km (a4) aralığı + fiyat üst sınırı; metin araması yok (başlıkta geçmeyen kelime sonucu sıfırlıyordu)
   const sahCat = (isSuv ? "arazi-suv-pickup-" : isVan ? "minivan-van_panelvan-" : "") + `${slug(r.brand)}-${slug(r.model)}`;
-  const sah = `https://www.sahibinden.com/${sahCat}?a5_min=${y}&a5_max=${y}&a4_max=${kmMax}&price_max=${max}`;
+  const sah = r.known
+    ? `https://www.sahibinden.com/${sahCat}?a5_min=${y}&a5_max=${y}&a4_max=${kmMax}&price_max=${max}`
+    : `https://www.sahibinden.com/vasita?query_text=${encodeURIComponent(r.brand + " " + r.model)}&a5_min=${y}&a5_max=${y}&price_max=${max}`;
   const gq = `${r.brand} ${r.model}${pkg ? " " + pkg : ""} ${y} ${c.fuel.toLocaleLowerCase('tr-TR')} ${c.gear.toLocaleLowerCase('tr-TR')} satılık site:sahibinden.com OR site:arabam.com`;
   const ggl = `https://www.google.com/search?q=${encodeURIComponent(gq)}`;
   const ic = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
