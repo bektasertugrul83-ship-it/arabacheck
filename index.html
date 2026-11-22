@@ -433,7 +433,8 @@ html.app .cols{gap:14px}
 html.app .subs{grid-template-columns:repeat(3,1fr);gap:8px}
 html.app .price-rows,html.app .deal-top,html.app .cost-in{grid-template-columns:1fr 1fr}
 html.app .cta-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0 4px}
-html.app .cta-row .btn-main[data-home]{display:none}
+html.app .cta-row .btn-main[data-home]{grid-column:1/-1;order:-1}
+html.app #view-result .cta-row #btn-edit{grid-column:1/-1}
 html.app .cta-row .btn-sec{justify-content:center;padding:0 10px;font-size:13.5px;height:48px}
 html.app .disc{margin-bottom:16px}
 /* Karşılaştırma ve geçmiş */
@@ -446,7 +447,6 @@ html.app .cmp tbody th{width:96px}
 html.app #view-compare .res-hero h1{display:none}
 html.app #view-compare .res-hero .verdict{margin-top:6px;padding-top:12px}
 html.app #view-compare .card{margin-top:-56px!important}
-html.app #view-compare .cta-row .btn-main{display:none}
 html.app #view-compare .cta-row{grid-template-columns:1fr}
 html.app #view-history:not(.hidden){display:block;padding-top:14px}
 .hist-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 4px 10px}
@@ -467,6 +467,7 @@ html.app #view-history:not(.hidden){display:block;padding-top:14px}
   <button class="ab-btn hidden" id="ab-back" aria-label="Geri"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M19 12H5m6-6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   <div class="ab-logo" id="ab-logo"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M4 15l1.6-4.8A2 2 0 0 1 7.5 9h9a2 2 0 0 1 1.9 1.2L20 15v3a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H7v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3z" fill="#081530"/><path d="M9 13.2l1.8 1.8L15 10.8" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
   <h1 class="sora" id="ab-title">Araba<span>Check</span></h1>
+  <button class="ab-btn hidden" id="ab-new" aria-label="Yeni analiz"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
   <button class="ab-btn hidden" id="ab-share" aria-label="Paylaş"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5" r="2.5" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="12" r="2.5" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="19" r="2.5" stroke="currentColor" stroke-width="2"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4" stroke="currentColor" stroke-width="2"/></svg></button>
 </header>
 <nav class="tabbar" id="tabbar">
@@ -2006,6 +2007,7 @@ function appChrome(v){
   $("#ab-back").classList.toggle("hidden", v!=="result");
   $("#ab-logo").classList.toggle("hidden", v==="result");
   $("#ab-share").classList.toggle("hidden", v!=="result");
+  $("#ab-new").classList.toggle("hidden", v==="home");
   const tab = v==="result" ? "home" : v;
   $$("#tabbar [data-tab]").forEach(b=>b.classList.toggle("on", b.dataset.tab===tab));
   $("#tb-badge").textContent = cmpList().length || "";
@@ -2031,6 +2033,7 @@ if (APP){
     else if (t==="history"){ renderHistory(); show("history"); if (location.hash!=="#gecmis") location.hash = "gecmis"; }
     else renderCompare();
   }));
+  $("#ab-new").addEventListener("click", ()=>{ resetForm(); goHome(); });
   $("#ab-back").addEventListener("click", ()=>{ if (history.length > 1) history.back(); else goHome(); });
   $("#ab-share").addEventListener("click", ()=>{
     if (!current) return; const txt = summaryText();
