@@ -257,6 +257,14 @@ kbd{font-family:inherit;font-size:11.5px;font-weight:700;padding:1px 6px;border-
 #pb-msg{font-size:13px;color:#9AA9CC}
 #pb-msg.ok{color:#9FF0C9}
 #pb-msg.err{color:#FFB4B4}
+.ocr-row{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.12);flex-wrap:wrap}
+.ocr-row b{display:block;font-size:14.5px}
+.ocr-row span{font-size:13px;color:#9AA9CC}
+.ocr-btn{display:inline-flex;align-items:center;gap:8px;height:44px;cursor:pointer}
+.ocr-btn.busy{opacity:.6;pointer-events:none}
+.ocr-prog{height:6px;border-radius:99px;background:rgba(255,255,255,.12);margin-top:12px;overflow:hidden}
+.ocr-prog i{display:block;height:100%;width:0;background:var(--ice);border-radius:99px;transition:width .3s}
+@media (max-width:560px){.ocr-btn{width:100%;justify-content:center}}
 .f input.filled,.f select.filled{border-color:var(--good);background:#F4FBF8}
 
 /* DEALS */
@@ -381,6 +389,11 @@ kbd{font-family:inherit;font-size:11.5px;font-weight:700;padding:1px 6px;border-
           <ol class="pb-steps"><li>İlan sayfasını açın</li><li><kbd>Ctrl</kbd>+<kbd>A</kbd> ile tümünü seçip <kbd>Ctrl</kbd>+<kbd>C</kbd> ile kopyalayın <small>(telefonda: Tümünü seç → Kopyala)</small></li><li>Buraya yapıştırın — form kendiliğinden dolar</li></ol>
           <textarea id="paste" rows="3" placeholder="İlan sayfasının metnini buraya yapıştırın…"></textarea>
           <div class="pb-foot"><span id="pb-msg"></span><button type="button" class="btn-w" id="btn-paste">Metinden doldur</button></div>
+          <div class="ocr-row">
+            <div><b>Telefondan mı bakıyorsunuz?</b><span>İlanın fiyat ve bilgiler kısmının ekran görüntüsünü alın (gerekirse 2–3 tane), buradan seçin.</span></div>
+            <label class="btn-w ocr-btn" id="ocr-label"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 8a2 2 0 0 1 2-2h1.5l1.2-1.8A1 1 0 0 1 9.5 4h5a1 1 0 0 1 .8.4L16.5 6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12.5" r="3.5" stroke="currentColor" stroke-width="2"/></svg>Ekran görüntüsünden doldur<input type="file" id="ocr-file" accept="image/*" multiple hidden></label>
+          </div>
+          <div class="ocr-prog hidden" id="ocr-prog"><i id="ocr-bar"></i></div>
         </div>
 
         <div class="trust">
@@ -897,9 +910,9 @@ function applyLink(){
   if (p.fuel){ setSeg("fuel", p.fuel); found.push(p.fuel); }
   if (p.gear){ setSeg("gear", p.gear); found.push(p.gear); }
   if (found.length){
-    hint.className="link-hint ok"; hint.textContent = `✓ ${p.host} linkinden algılandı: ${found.join(" · ")} — fiyat, km ve hasar için ilanı açıp metnini aşağıya yapıştırın.`;
+    hint.className="link-hint ok"; hint.textContent = `✓ ${p.host} linkinden algılandı: ${found.join(" · ")} — fiyat, km ve hasar için aşağıdan ilanın ekran görüntüsünü seçin ya da metnini yapıştırın.`;
   } else {
-    hint.className="link-hint"; hint.textContent = `${p.host} linkinden araç bilgisi okunamadı. İlanı açıp sayfa metnini aşağıya yapıştırın.`;
+    hint.className="link-hint"; hint.textContent = `${p.host} linkinden araç bilgisi okunamadı (kısa paylaşım linklerinde bilgi bulunmaz). Aşağıdan ilanın ekran görüntüsünü seçin ya da sayfa metnini yapıştırın.`;
   }
   $("#paste-box").scrollIntoView({behavior:"smooth", block:"center"});
 }
@@ -1050,6 +1063,73 @@ async function fillFromText(){
 }
 $("#btn-paste").addEventListener("click", fillFromText);
 $("#paste").addEventListener("paste", ()=>setTimeout(fillFromText, 60));
+
+/* ================= EKRAN GÖRÜNTÜSÜNDEN DOLDURMA (OCR) ================= */
+// Yazı tanıma cihazda çalışır (Tesseract). Önce yanındaki ocr/ klasörü, yoksa CDN kullanılır.
+const OCR_SOURCES = [
+  { js: "ocr/tesseract.min.js", base: new URL("ocr/", location.href).href },
+  { js: "https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js", cdn: true },
+];
+let ocrWorker = null;
+function loadScript(src){ return new Promise((ok, bad) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = bad; document.head.appendChild(s); }); }
+async function getOcrWorker(onProg){
+  if (ocrWorker) return ocrWorker;
+  let lastErr;
+  for (const src of OCR_SOURCES){
+    try {
+      if (!window.Tesseract) await loadScript(src.js);
+      const opts = src.cdn ? {
+        workerPath: "https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/worker.min.js",
+        corePath: "https://cdn.jsdelivr.net/npm/tesseract.js-core@6.0.0",
+        langPath: "https://cdn.jsdelivr.net/npm/@tesseract.js-data/tur/4.0.0_best_int",
+      } : { workerPath: src.base + "worker.min.js", corePath: src.base, langPath: src.base, cacheMethod: "none" };
+      opts.logger = m => { if (m && typeof m.progress === "number") onProg(m.status, m.progress); };
+      ocrWorker = await Tesseract.createWorker("tur", 1, opts);
+      return ocrWorker;
+    } catch(e){ lastErr = e; delete window.Tesseract; }
+  }
+  throw lastErr || new Error("ocr");
+}
+function cleanOcr(t){
+  return t.replace(/[|¦“”"«»_~]/g, " ")
+    .replace(/(\d)\s*[.,]\s*(\d{3})/g, "$1.$2").replace(/(\d)\s*[.,]\s*(\d{3})/g, "$1.$2")
+    .replace(/\bT[Ll1I]\b/g, "TL").replace(/^\s*[-•·:*]+\s*/gm, "")
+    .replace(/\bYak[ıi1l]t\b/gi, "Yakıt").replace(/\bY[ıi1l]l\b/g, "Yıl").replace(/\bK[Mm]\b/g, "KM");
+}
+async function fillFromImages(files){
+  files = [...files].filter(f => /^image\//.test(f.type) || /\.(png|jpe?g|webp|heic)$/i.test(f.name));
+  if (!files.length) return;
+  const msg = $("#pb-msg"), lab = $("#ocr-label"), prog = $("#ocr-prog"), bar = $("#ocr-bar");
+  lab.classList.add("busy"); prog.classList.remove("hidden"); bar.style.width = "3%";
+  msg.className = ""; msg.textContent = "Yazı tanıma hazırlanıyor…";
+  let i = 0;
+  const setProg = (status, p) => {
+    const ready = /recogniz/.test(status);
+    const total = ready ? (i + p) / files.length : p * 0.15;
+    bar.style.width = Math.max(3, Math.round(ready ? 15 + total * 85 : total * 100)) + "%";
+    msg.textContent = ready ? `Görüntü okunuyor${files.length > 1 ? ` (${i + 1}/${files.length})` : ""}… %${Math.round(p * 100)}` : "Yazı tanıma hazırlanıyor…";
+  };
+  try {
+    const w = await getOcrWorker(setProg);
+    const texts = [];
+    for (i = 0; i < files.length; i++){
+      const { data } = await w.recognize(files[i]);
+      texts.push(data.text || "");
+    }
+    const text = cleanOcr(texts.join("\n"));
+    if (text.replace(/\s/g, "").length < 30){ msg.className = "err"; msg.textContent = "Görüntüde okunabilir yazı bulunamadı. İlanın bilgiler kısmının net bir ekran görüntüsünü seçin."; return; }
+    $("#paste").value = text;
+    await fillFromText();
+  } catch(e){
+    msg.className = "err";
+    msg.textContent = "Yazı tanıma yüklenemedi. İnternet bağlantınızı kontrol edip tekrar deneyin.";
+  } finally {
+    lab.classList.remove("busy"); prog.classList.add("hidden"); $("#ocr-file").value = "";
+  }
+}
+$("#ocr-file").addEventListener("change", e => fillFromImages(e.target.files));
+$("#paste-box").addEventListener("dragover", e => { if ([...e.dataTransfer.items].some(x => x.kind === "file")) e.preventDefault(); });
+$("#paste-box").addEventListener("drop", e => { if (e.dataTransfer.files.length){ e.preventDefault(); fillFromImages(e.dataTransfer.files); } });
 
 /* ================= GERÇEK İLANLARLA KALİBRASYON ================= */
 // Yapıştırılan metinden ilanları çıkar: her fiyatın etrafındaki satırlardan km ve yıl

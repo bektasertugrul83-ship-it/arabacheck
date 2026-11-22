@@ -11,10 +11,11 @@ rm -rf "$OUT" && mkdir -p "$OUT/classes" "$OUT/dex"
 
 # Web sayfasının en güncel hâlini uygulamaya kopyala
 cp ../index.html assets/index.html
+rm -rf assets/ocr && cp -r ../ocr assets/ocr
 
 "$BT/aapt2" compile --dir res -o "$OUT/res.zip"
 "$BT/aapt2" link -o "$OUT/unsigned.apk" -I "$JAR" --manifest AndroidManifest.xml \
-  -A assets --java "$OUT/gen" "$OUT/res.zip" --auto-add-overlay
+  -A assets -0 gz -0 wasm --java "$OUT/gen" "$OUT/res.zip" --auto-add-overlay
 javac -nowarn -source 17 -target 17 -classpath "$JAR" -d "$OUT/classes" \
   $(find src "$OUT/gen" -name '*.java') 2> >(grep -v -e '^warning' -e 'deprecat' -e '^Note:' -e '^1 warning' >&2)
 "$BT/d8" --release --min-api 24 --lib "$JAR" --output "$OUT/dex" $(find "$OUT/classes" -name '*.class')

@@ -2,6 +2,8 @@
 const fs = require("fs"), path = require("path");
 const root = path.join(__dirname, "..");
 fs.copyFileSync(path.join(root, "..", "index.html"), path.join(root, "app", "index.html"));
+fs.rmSync(path.join(root, "app", "ocr"), { recursive: true, force: true });
+fs.cpSync(path.join(root, "..", "ocr"), path.join(root, "app", "ocr"), { recursive: true });
 const png = fs.readFileSync(path.join(root, "..", "android", "icon-512.png"));
 fs.copyFileSync(path.join(root, "..", "android", "icon-512.png"), path.join(root, "app", "icon.png"));
 // Birden çok boyutta PNG gömülü ICO (Windows Vista+)

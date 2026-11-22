@@ -11,3 +11,5 @@ android/assets/index.html
 # İmza anahtarı: gizli tutun, ayrıca yedekleyin
 *.keystore
 *.idsig
+android/assets/ocr/
+desktop/app/ocr/
