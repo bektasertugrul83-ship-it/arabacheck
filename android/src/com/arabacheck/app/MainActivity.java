@@ -120,7 +120,12 @@ public class MainActivity extends Activity {
                 Uri u = req.getUrl();
                 String scheme = u.getScheme();
                 if (HOST.equals(u.getHost())) return false;
-                openInBrowser(u);
+                // Linki Android'e bırak: sahibinden / arabam uygulaması yüklüyse onda, değilse tarayıcıda açılır
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, u));
+                } catch (ActivityNotFoundException e) {
+                    openInBrowser(u);
+                }
                 return true;
             }
 
@@ -176,10 +181,7 @@ public class MainActivity extends Activity {
         else web.loadUrl(START_URL);
     }
 
-    /**
-     * İlan linklerini sahibinden/arabam uygulamasında değil, telefonun tarayıcısında aç:
-     * bu uygulamalar linki yakalayıp filtreleri (model, yıl, km, fiyat) yok sayıyor ve ana sayfayı açıyor.
-     */
+    /** Yedek: linki doğrudan varsayılan tarayıcıda aç. */
     private void openInBrowser(Uri u) {
         Intent i = new Intent(Intent.ACTION_VIEW, u);
         i.addCategory(Intent.CATEGORY_BROWSABLE);
