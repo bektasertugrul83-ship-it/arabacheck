@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ArabaCheck — İkinci El Araç Analizi</title>
+<script>try{if(/[?&]app=1\b/.test(location.search)||window.ArabaCheckApp||sessionStorage.getItem("ac:app"))document.documentElement.classList.add("app"),sessionStorage.setItem("ac:app","1")}catch(e){if(window.ArabaCheckApp)document.documentElement.classList.add("app")}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -348,9 +349,131 @@ kbd{font-family:inherit;font-size:11.5px;font-weight:700;padding:1px 6px;border-
   .gauge .num b{font-size:48px}
   .steps{display:none}
 }
+
+/* ================= UYGULAMA GÖRÜNÜMÜ (Android) ================= */
+.appbar,.tabbar,#view-history,.app-only{display:none}
+html.app{-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
+html.app body{padding-top:56px;padding-bottom:calc(68px + 8px);background:var(--paper);-webkit-user-select:none;user-select:none}
+html.app input,html.app textarea,html.app select{-webkit-user-select:text;user-select:text}
+html.app .app-only{display:revert}
+html.app .appbar{display:flex;position:fixed;top:0;left:0;right:0;height:56px;z-index:45;align-items:center;gap:6px;padding:0 6px 0 8px;background:var(--n900);color:#fff;box-shadow:0 1px 0 rgba(255,255,255,.06)}
+.appbar h1{flex:1;font-size:19px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.appbar .ab-btn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;flex:none}
+.appbar .ab-btn:active{background:rgba(255,255,255,.12)}
+.appbar .ab-logo{width:32px;height:32px;border-radius:9px;background:#fff;display:grid;place-items:center;margin:0 6px 0 6px;flex:none}
+.appbar .ab-logo + h1 span{color:var(--ice)}
+html.app .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;height:68px;z-index:45;background:#fff;border-top:1px solid var(--line);padding:6px 8px}
+html.app.kb .tabbar{display:none}
+html.app.kb body{padding-bottom:0}
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:12px;font-weight:700;color:var(--ink3);position:relative;border-radius:14px}
+.tabbar button .ti{width:56px;height:30px;border-radius:99px;display:grid;place-items:center;transition:background .2s}
+.tabbar button.on{color:var(--n900)}
+.tabbar button.on .ti{background:#E3EAF8}
+.tabbar button i{position:absolute;top:2px;left:calc(50% + 8px);min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:var(--bad);color:#fff;font-style:normal;font-size:11px;font-weight:800;display:grid;place-items:center}
+.tabbar button i:empty{display:none}
+html.app button:active,html.app .btn-w:active,html.app .check:active,html.app .seg button:active{transform:scale(.97)}
+html.app .btn-main:hover,html.app .btn-w:hover{transform:none}
+html.app .toast{bottom:88px}
+html.app.kb .toast{bottom:20px}
+html.app .cmp-bar{display:none!important}
+html.app .nav,html.app footer,html.app .features,html.app .hero-inner>.pill,html.app .hero .lead,html.app .trust,html.app .steps,html.app .back,html.app .pb-steps,html.app .link-hint:empty{display:none!important}
+html.app .wrap{padding:0 14px}
+/* Ana ekran */
+html.app .hero{padding-bottom:58px;background:var(--n900)}
+html.app .hero:after{display:none}
+html.app .hero-inner{padding-top:14px;text-align:left}
+html.app .hero h1{font-size:23px;margin:0 2px 2px;line-height:1.2}
+html.app .hero h1 br{display:none}
+html.app .app-sub{display:block;color:#9AA9CC;font-size:14px;margin:0 2px 14px}
+html.app .paste-box{margin:0;display:flex;flex-direction:column;border-style:solid;border-color:rgba(255,255,255,.14);padding:16px}
+html.app .ocr-row{order:-1;margin:0 0 4px;padding:0;border:0;flex-direction:column;align-items:stretch}
+html.app .ocr-row>div{display:none}
+html.app .ocr-btn{width:100%;justify-content:center;height:54px;font-size:15.5px;border-radius:14px}
+html.app .ocr-prog{order:0}
+html.app .pb-head{order:1;margin-top:12px}
+html.app .pb-head b{font-size:14px}
+html.app #paste,html.app #btn-paste{display:none}
+html.app .paste-box.txt #paste{display:block;margin-top:10px}
+html.app .paste-box.txt #btn-paste{display:inline-flex;align-items:center}
+html.app .pb-foot{order:3}
+html.app .pb-toggle{color:var(--ice);font-weight:700;font-size:13.5px;padding:8px 0}
+html.app .link-box{order:2;margin:10px 0 0;padding:5px;border-radius:14px;flex-direction:row!important}
+html.app .link-box .ic{display:none}
+html.app #link-hint{order:2}
+html.app .link-box input{font-size:14.5px;padding:10px 4px}
+html.app .link-box .btn-w{height:42px!important;font-size:13.5px;padding:0 16px}
+html.app .link-hint{text-align:left;margin-top:8px;font-size:12.5px}
+html.app .form-card{margin-top:-40px;border-radius:20px}
+html.app .fc-head{padding:18px 18px 14px}
+html.app .fc-head h2{font-size:18px}
+html.app .fc-body{padding:18px}
+html.app .fc-foot{padding:16px 18px;flex-direction:column;align-items:stretch}
+html.app .btn-main{width:100%;justify-content:center}
+html.app .grid{grid-template-columns:1fr 1fr;gap:14px 12px}
+html.app .f.s2{grid-column:1/-1}
+html.app .seg{overflow-x:auto}
+html.app .seg button{font-size:13px;padding:0 6px;white-space:nowrap}
+html.app .saved-sec{display:none!important}
+/* Rapor */
+html.app .res-hero{padding-bottom:96px}
+html.app .res-top{padding-top:16px;gap:14px;grid-template-columns:1fr;justify-items:stretch}
+html.app .res-top h1{font-size:25px}
+html.app .res-top .gauge{order:-1;justify-self:center;width:170px;height:170px}
+html.app .gauge .num b{font-size:46px}
+html.app .verdict{font-size:14.5px;margin-top:14px}
+html.app .tags{margin-top:12px}
+html.app .tag{font-size:12px;padding:5px 10px}
+html.app .kpis{grid-template-columns:1fr 1fr;gap:10px;margin-top:-74px}
+html.app .kpi{padding:14px}
+html.app .kpi .v{font-size:19px;white-space:normal}
+html.app .kpi .k{font-size:10.5px}
+html.app .card{padding:18px;border-radius:18px}
+html.app .card + .card,html.app .cols{margin-top:14px}
+html.app .cols{gap:14px}
+html.app .subs{grid-template-columns:repeat(3,1fr);gap:8px}
+html.app .price-rows,html.app .deal-top,html.app .cost-in{grid-template-columns:1fr 1fr}
+html.app .cta-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0 4px}
+html.app .cta-row .btn-main[data-home]{display:none}
+html.app .cta-row .btn-sec{justify-content:center;padding:0 10px;font-size:13.5px;height:48px}
+html.app .disc{margin-bottom:16px}
+/* Karşılaştırma ve geçmiş */
+html.app #view-compare .res-hero{padding-bottom:64px}
+html.app #view-compare .res-hero > .wrap > div{padding-top:0!important}
+html.app .cmp{min-width:0}
+html.app .cmp th,html.app .cmp td{padding:10px 8px;font-size:13px}
+html.app .cmp thead th{font-size:13.5px}
+html.app .cmp tbody th{width:96px}
+html.app #view-compare .res-hero h1{display:none}
+html.app #view-compare .res-hero .verdict{margin-top:6px;padding-top:12px}
+html.app #view-compare .card{margin-top:-56px!important}
+html.app #view-compare .cta-row .btn-main{display:none}
+html.app #view-compare .cta-row{grid-template-columns:1fr}
+html.app #view-history:not(.hidden){display:block;padding-top:14px}
+.hist-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 4px 10px}
+.hist-head b{font-size:13px;color:var(--ink3);font-weight:700}
+.hist-head button{font-size:13px;font-weight:800;color:var(--bad);padding:6px 4px}
+.hi{display:grid;grid-template-columns:50px 1fr auto;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px}
+.hi:active{background:var(--paper)}
+.hi h4{font-size:15px;font-weight:700;line-height:1.3}
+.hi p{font-size:12.5px;color:var(--ink3);font-weight:600;margin-top:2px}
+.hi .sv-sc{width:50px;height:50px}
+.hi .hi-del{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--ink3)}
+.hist-empty{text-align:center;padding:60px 20px;color:var(--ink3)}
+.hist-empty b{display:block;color:var(--ink);font-size:17px;margin:14px 0 4px}
 </style>
 </head>
 <body>
+<header class="appbar" id="appbar">
+  <button class="ab-btn hidden" id="ab-back" aria-label="Geri"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M19 12H5m6-6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  <div class="ab-logo" id="ab-logo"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M4 15l1.6-4.8A2 2 0 0 1 7.5 9h9a2 2 0 0 1 1.9 1.2L20 15v3a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H7v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3z" fill="#081530"/><path d="M9 13.2l1.8 1.8L15 10.8" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <h1 class="sora" id="ab-title">Araba<span>Check</span></h1>
+  <button class="ab-btn hidden" id="ab-share" aria-label="Paylaş"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5" r="2.5" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="12" r="2.5" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="19" r="2.5" stroke="currentColor" stroke-width="2"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4" stroke="currentColor" stroke-width="2"/></svg></button>
+</header>
+<nav class="tabbar" id="tabbar">
+  <button data-tab="home" class="on"><span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 15l1.6-4.8A2 2 0 0 1 7.5 9h9a2 2 0 0 1 1.9 1.2L20 15v3a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H7v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg></span>Analiz</button>
+  <button data-tab="history"><span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.9"/><path d="M12 7.5V12l3 2" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></span>Geçmiş</button>
+  <button data-tab="compare"><span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M12 3v18" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></span>Karşılaştır<i id="tb-badge"></i></button>
+</nav>
 
 <!-- ================= HOME ================= -->
 <div id="view-home">
@@ -372,6 +495,7 @@ kbd{font-family:inherit;font-size:11.5px;font-weight:700;padding:1px 6px;border-
       <div class="hero-inner">
         <div class="pill">Türkiye ikinci el piyasası için akıllı ekspertiz ön raporu</div>
         <h1>Almadan önce <em>bilin.</em><br>Pişman olmadan alın.</h1>
+        <p class="app-sub app-only">İlanın ekran görüntülerini seçin, bilgiler otomatik dolsun.</p>
         <p class="lead">İlan linkini yapıştırın veya araç bilgilerini girin. ArabaCheck fiyatı, kronik sorunları, satın alma riskini ve piyasa değerini saniyeler içinde analiz etsin.</p>
 
         <div class="link-box">
@@ -661,6 +785,14 @@ kbd{font-family:inherit;font-size:11.5px;font-weight:700;padding:1px 6px;border-
   </div>
 </div>
 <div class="cmp-bar hidden" id="cmp-bar"><span id="cmp-bar-t"></span><button id="cmp-open">Karşılaştır</button><button class="x" id="cmp-x" aria-label="Gizle">✕</button></div>
+
+<!-- ================= GEÇMİŞ (uygulama) ================= -->
+<div id="view-history" class="hidden">
+  <div class="wrap">
+    <div class="hist-head"><b id="hist-count"></b><button id="hist-clear" class="hidden">Tümünü sil</button></div>
+    <div id="hist-list"></div>
+  </div>
+</div>
 
 <!-- LOADING -->
 <div class="loading hidden" id="loading">
@@ -1651,6 +1783,7 @@ function updateCmpUI(){
   $("#btn-cmp-add span").textContent = inList ? "Karşılaştırmada ✓" : "Karşılaştırmaya ekle";
   const onCmp = !$("#view-compare").classList.contains("hidden");
   $("#cmp-bar").classList.toggle("hidden", !l.length || onCmp || cmpHidden);
+  if (typeof APP !== "undefined" && APP) $("#tb-badge").textContent = l.length || "";
   $("#cmp-bar-t").textContent = l.length===1 ? "1 araç eklendi · bir araç daha ekleyin" : `${l.length} araç karşılaştırmada`;
 }
 $("#btn-cmp-add").addEventListener("click", ()=>{
@@ -1811,30 +1944,114 @@ function show(v){
   $("#view-home").classList.toggle("hidden", v!=="home");
   $("#view-result").classList.toggle("hidden", v!=="result");
   $("#view-compare").classList.toggle("hidden", v!=="compare");
+  $("#view-history").classList.toggle("hidden", v!=="history");
   window.scrollTo({top:0, behavior:"instant"});
   if (typeof updateCmpUI === "function") updateCmpUI();
+  if (typeof appChrome === "function") appChrome(v);
 }
 $$("[data-home]").forEach(b=>b.addEventListener("click", ()=>{ resetForm(); goHome(); }));
 $("#btn-edit").addEventListener("click", goHome);
 function goHome(){ show("home"); if(location.hash) history.replaceState(null,"",location.pathname+location.search); }
 function resetForm(){ $("#car-form").reset(); $("#paste").value=""; $("#pb-msg").textContent=""; $("#pb-open").classList.add("hidden"); setSeg("fuel","Benzin"); setSeg("gear","Manuel"); $("#owners").value="2"; $("#link").value=""; $("#link-hint").className="link-hint"; $("#link-hint").textContent="Linkteki marka, model ve yıl bilgisi otomatik algılanır — kalan bilgileri aşağıdan tamamlayın."; }
 
-$("#btn-copy").addEventListener("click", async ()=>{
-  if(!current) return; const r=current, c=r.car;
-  const txt = `ArabaCheck Raporu — ${c.year} ${r.brand} ${r.model} ${c.engine||""}
+function summaryText(){
+  const r=current, c=r.car;
+  return `ArabaCheck Raporu — ${c.year} ${r.brand} ${r.model} ${c.engine||""}
 Genel puan: ${r.overall}/100 (${r.grade})
 Satın alma riski: ${r.riskLabel} (${r.risk}/100)
 İlan fiyatı: ${c.price?tl(c.price):"—"} | Piyasa değeri: ${tl(r.market.mid)} (${tl(r.market.min)} – ${tl(r.market.max)})
 Kronik sorunlar: ${r.issues.map(i=>i.t).join("; ")||"—"}
 ${r.verdict}`;
+}
+$("#btn-copy").addEventListener("click", async ()=>{
+  if(!current) return; const txt = summaryText();
   try { await navigator.clipboard.writeText(txt); toast("Özet panoya kopyalandı"); } catch { toast("Kopyalanamadı — tarayıcı izin vermedi"); }
 });
 
 window.addEventListener("hashchange", ()=>{
   if (location.hash==="#karsilastir"){ if ($("#view-compare").classList.contains("hidden")) renderCompare(); }
   else if (location.hash==="#analiz" && current) show("result");
+  else if (location.hash==="#gecmis" && APP){ renderHistory(); show("history"); }
   else if (!location.hash) show("home");
 });
+/* ================= UYGULAMA GÖRÜNÜMÜ (Android) ================= */
+var APP = document.documentElement.classList.contains("app");
+const HIST_KEY = "arabacheck:history";
+let histMem = [];
+const histLoad = () => { try { return JSON.parse(localStorage.getItem(HIST_KEY)||"[]") || []; } catch { return histMem; } };
+const histSave = l => { histMem = l; try { localStorage.setItem(HIST_KEY, JSON.stringify(l)); } catch {} };
+function histUpsert(r){
+  if (!r || !r.car || r.source==="ai") return;
+  const id = cmpId(r), c = r.car;
+  const l = histLoad().filter(x=>x.id!==id);
+  l.unshift({id, at:Date.now(), title:`${c.year} ${r.brand} ${r.model}${c.engine?" "+c.engine:""}`, overall:r.overall, riskLabel:r.riskLabel, car:c});
+  histSave(l.slice(0,60));
+}
+function renderHistory(){
+  const l = histLoad();
+  $("#hist-count").textContent = l.length ? `${l.length} analiz · bu telefonda saklanır` : "";
+  $("#hist-clear").classList.toggle("hidden", !l.length);
+  $("#hist-list").innerHTML = l.length ? l.map((x,i)=>{
+    const c = x.car||{}, dt = new Date(x.at).toLocaleDateString('tr-TR',{day:'numeric',month:'short'});
+    return `<div class="hi" data-hi="${i}"><div class="sv-sc ${badgeFor(x.overall||0)}">${x.overall??"–"}</div>
+      <div><h4>${esc(x.title)}</h4><p>${c.price?tlShort(c.price):"Fiyat yok"} · ${fmt(c.km||0)} km · ${esc(x.riskLabel||"")} risk · ${dt}</p></div>
+      <button class="hi-del" data-hi-del="${i}" aria-label="Sil"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>`;
+  }).join("") : `<div class="hist-empty"><svg width="56" height="56" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="#C3CCDD" stroke-width="1.6"/><path d="M12 7.5V12l3 2" stroke="#C3CCDD" stroke-width="1.6" stroke-linecap="round"/></svg><b>Henüz analiz yok</b>Yaptığınız analizler burada listelenir.</div>`;
+}
+const TITLES = {home:null, result:"Rapor", compare:"Karşılaştırma", history:"Geçmiş"};
+function appChrome(v){
+  if (!APP) return;
+  const t = TITLES[v];
+  $("#ab-title").innerHTML = t ? esc(t) : 'Araba<span>Check</span>';
+  $("#ab-back").classList.toggle("hidden", v!=="result");
+  $("#ab-logo").classList.toggle("hidden", v==="result");
+  $("#ab-share").classList.toggle("hidden", v!=="result");
+  const tab = v==="result" ? "home" : v;
+  $$("#tabbar [data-tab]").forEach(b=>b.classList.toggle("on", b.dataset.tab===tab));
+  $("#tb-badge").textContent = cmpList().length || "";
+}
+if (APP){
+  const _render = render;
+  render = function(r){ _render(r); histUpsert(r); };
+  $(".hero h1").innerHTML = "Hangi aracı <em>inceliyorsunuz?</em>";
+  $(".pb-head b").textContent = "Ya da ilan linki / metni ile";
+  $(".pb-head span").textContent = "Link yalnızca marka ve modeli bulur; tüm bilgiler için ekran görüntüsü en kolayıdır.";
+  const tg = document.createElement("button"); tg.type = "button"; tg.className = "pb-toggle"; tg.textContent = "Metin yapıştırarak doldur";
+  tg.addEventListener("click", ()=>{ const on = $("#paste-box").classList.toggle("txt"); tg.textContent = on ? "Metin kutusunu gizle" : "Metin yapıştırarak doldur"; if (on) $("#paste").focus(); });
+  $(".pb-foot").prepend(tg);
+  $(".paste-box").insertBefore($(".link-box"), $(".pb-foot"));
+  $(".paste-box").insertBefore($("#link-hint"), $(".pb-foot"));
+  $("#link").placeholder = "İlan linkini yapıştırın…";
+  $("#link-hint").textContent = "";
+  const _reset = resetForm; resetForm = function(){ _reset(); $("#link-hint").textContent = ""; };
+  $("#btn-link").textContent = "Doldur";
+  $$("#tabbar [data-tab]").forEach(b=>b.addEventListener("click", ()=>{
+    const t = b.dataset.tab;
+    if (t==="home"){ if (location.hash) history.replaceState(null,"",location.pathname+location.search); show("home"); }
+    else if (t==="history"){ renderHistory(); show("history"); if (location.hash!=="#gecmis") location.hash = "gecmis"; }
+    else renderCompare();
+  }));
+  $("#ab-back").addEventListener("click", ()=>{ if (history.length > 1) history.back(); else goHome(); });
+  $("#ab-share").addEventListener("click", ()=>{
+    if (!current) return; const txt = summaryText();
+    if (window.ArabaCheckApp && ArabaCheckApp.share) ArabaCheckApp.share(txt);
+    else if (navigator.share) navigator.share({text:txt}).catch(()=>{});
+    else $("#btn-copy").click();
+  });
+  $("#hist-clear").addEventListener("click", ()=>{ if (confirm("Tüm geçmiş analizler silinsin mi?")){ histSave([]); renderHistory(); } });
+  document.addEventListener("click", e=>{
+    const d = e.target.closest("[data-hi-del]");
+    if (d){ e.stopPropagation(); const l = histLoad(); l.splice(+d.dataset.hiDel,1); histSave(l); renderHistory(); toast("Silindi"); return; }
+    const h = e.target.closest("[data-hi]");
+    if (h){ const x = histLoad()[+h.dataset.hi]; if (x && x.car){ render(analyze(x.car)); try{ localStorage.setItem("arabacheck:last", JSON.stringify(x.car)); }catch{} location.hash = "analiz"; } }
+  });
+  // Klavye açıkken alt sekme çubuğunu gizle
+  const isField = el => el && (el.tagName==="TEXTAREA" || el.tagName==="SELECT" || (el.tagName==="INPUT" && !/checkbox|radio|file|button|submit/.test(el.type)));
+  document.addEventListener("focusin", e=>{ if (isField(e.target)) document.documentElement.classList.add("kb"); });
+  document.addEventListener("focusout", ()=>setTimeout(()=>{ if (!isField(document.activeElement)) document.documentElement.classList.remove("kb"); }, 60));
+  appChrome("home");
+}
+
 updateCmpUI();
 // On load with #analiz: restore last analysis
 (function(){
@@ -1842,6 +2059,7 @@ updateCmpUI();
     let last=null; try{ last = JSON.parse(localStorage.getItem("arabacheck:last")||"null"); }catch{}
     if (last && last.brand){ render(analyze(last)); } else { history.replaceState(null,"",location.pathname); }
   } else if (location.hash==="#karsilastir"){ renderCompare(); }
+  else if (location.hash==="#gecmis" && APP){ renderHistory(); show("history"); }
 })();
 </script>
 </body>

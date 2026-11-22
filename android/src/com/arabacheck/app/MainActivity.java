@@ -24,7 +24,7 @@ public class MainActivity extends Activity {
     // Uygulama dosyaları bu sanal https adresinden sunulur (Android'in bu iş için ayırdığı alan adı).
     // Böylece yazı tanıma (Web Worker + WebAssembly) dosya erişimi kısıtlarına takılmaz.
     private static final String HOST = "appassets.androidplatform.net";
-    private static final String START_URL = "https://" + HOST + "/index.html";
+    private static final String START_URL = "https://" + HOST + "/index.html?app=1";
     private static final int PICK_IMAGES = 41;
     private WebView web;
     private ValueCallback<Uri[]> fileCallback;
@@ -45,17 +45,51 @@ public class MainActivity extends Activity {
             ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             if (cm != null) cm.setPrimaryClip(ClipData.newPlainText("ArabaCheck", text));
         }
+
+        /** Rapor özetini Android paylaşım menüsüyle gönder (WhatsApp, SMS…). */
+        @JavascriptInterface
+        public void share(String text) {
+            runOnUiThread(() -> {
+                Intent i = new Intent(Intent.ACTION_SEND);
+                i.setType("text/plain");
+                i.putExtra(Intent.EXTRA_TEXT, text);
+                startActivity(Intent.createChooser(i, "Raporu paylaş"));
+            });
+        }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         web = new WebView(this);
-        web.setBackgroundColor(Color.parseColor("#081530"));
-        setContentView(web);
+        web.setBackgroundColor(Color.parseColor("#F3F5FA"));
+
+        // Üstte lacivert (uygulama çubuğuyla aynı), altta beyaz (sekme çubuğuyla aynı) sistem çubuğu alanı.
+        final View topBar = new View(this);
+        topBar.setBackgroundColor(Color.parseColor("#081530"));
+        final View bottomBar = new View(this);
+        bottomBar.setBackgroundColor(Color.WHITE);
+        android.widget.LinearLayout root = new android.widget.LinearLayout(this);
+        root.setOrientation(android.widget.LinearLayout.VERTICAL);
+        root.setBackgroundColor(Color.parseColor("#081530"));
+        root.addView(topBar, new android.widget.LinearLayout.LayoutParams(-1, 0));
+        root.addView(web, new android.widget.LinearLayout.LayoutParams(-1, 0, 1f));
+        root.addView(bottomBar, new android.widget.LinearLayout.LayoutParams(-1, 0));
+        setContentView(root);
+        getWindow().setStatusBarColor(Color.parseColor("#081530"));
+        getWindow().setNavigationBarColor(Color.WHITE);
+        if (android.os.Build.VERSION.SDK_INT >= 30) {
+            android.view.WindowInsetsController c = getWindow().getInsetsController();
+            if (c != null) c.setSystemBarsAppearance(
+                    android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS,
+                    android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+                            | android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS);
+        } else if (android.os.Build.VERSION.SDK_INT >= 26) {
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        }
 
         // Android 15 kenardan kenara çizim: içeriği durum/gezinme çubuklarının altına sokma.
-        web.setOnApplyWindowInsetsListener((View v, WindowInsets insets) -> {
+        root.setOnApplyWindowInsetsListener((View v, WindowInsets insets) -> {
             int top, bottom, left, right;
             if (android.os.Build.VERSION.SDK_INT >= 30) {
                 android.graphics.Insets i = insets.getInsets(
@@ -65,7 +99,11 @@ public class MainActivity extends Activity {
                 top = insets.getSystemWindowInsetTop(); bottom = insets.getSystemWindowInsetBottom();
                 left = insets.getSystemWindowInsetLeft(); right = insets.getSystemWindowInsetRight();
             }
-            v.setPadding(left, top, right, bottom);
+            v.setPadding(left, 0, right, 0);
+            topBar.getLayoutParams().height = top;
+            bottomBar.getLayoutParams().height = bottom;
+            topBar.requestLayout();
+            bottomBar.requestLayout();
             return insets;
         });
 
