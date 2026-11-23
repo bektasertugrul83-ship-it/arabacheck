@@ -929,9 +929,13 @@ function tierPenalty(np){
 // Kalan değer oranı: ilk yıl düşüşü, 5 yıl hızlı, 6-13 yaş yavaş, 13 yaştan sonra yeniden hızlanır.
 // 13+ yaşta araçlar "taban fiyata" yaklaşır (Kasım 2026 ilanları: 2008 Focus ≈ 500 B, 2000 Passat ≈ 460 B,
 // 1995 Vectra ≈ 220 B, 1995 Şahin ≈ 185 B, 1995 318i ≈ 295 B ₺); premium eski araçlar daha hızlı düşer.
-function residual(age, d, cls){
+// Bazı markaların eski araçları "dayanıklı" ününe sahip, talep görür ve çok daha yavaş değer kaybeder
+// (Kasım 2026: 1995 Corolla 1.6 GLi ≈ 380 B, 2001 Corolla ≈ 450 B, 2008 Corolla ≈ 725 B; 1995-96 E 200/220 ≈ 500 B;
+//  1995-96 Civic ≈ 270 B ₺ — aynı yaştaki Vectra/Şahin ≈ 185-220 B ₺)
+const OLD_TAIL = {"Toyota":0.947, "Honda":0.918, "Mercedes-Benz":0.91};
+function residual(age, d, cls, brand){
   if (age <= 0) return 0.9;
-  const tail = cls === "p" ? 0.89 : 0.91;
+  const tail = (brand && OLD_TAIL[brand]) || (cls === "p" ? 0.89 : 0.91);
   return 0.85 * Math.pow(d, Math.min(age, 5)) * Math.pow(0.975, Math.min(8, Math.max(0, age - 5))) * Math.pow(tail, Math.max(0, age - 13));
 }
 // Çalışır durumdaki bir aracın sınıfına göre taban değeri (TL, Kasım 2026)
@@ -1512,7 +1516,7 @@ function calibrate(market, c, cls, age){
   // her ilanı bu aracın yılına ve km'sine çevir
   let adjd = comps.map(x => {
     let v = x.price;
-    if (x.year && x.year !== c.year) v *= residual(NOW_YEAR - c.year, depr, cls) / residual(NOW_YEAR - x.year, depr, cls);
+    if (x.year && x.year !== c.year) v *= residual(NOW_YEAR - c.year, depr, cls, market.brand) / residual(NOW_YEAR - x.year, depr, cls, market.brand);
     if (x.km != null) v *= (1 + subjKm) / (1 + kmAdjFor(x.km, x.year || c.year));
     return {...x, adj: v};
   });
@@ -1555,7 +1559,7 @@ function analyze(c){
   // --- Market value ---
   // Marka bazlı yıllık değer koruma; çok pahalı (lüks) modeller daha hızlı kaybeder
   const depr = ((brand && BRAND_DEPR[brand]) || (cls==="p" ? 0.89 : cls==="m" ? 0.895 : 0.9)) - tierPenalty(newPrice) * ((brand && TIER_BRAND[brand]) ?? 1);
-  let base = Math.max(newPrice * residual(age, depr, cls), FLOOR_VALUE[cls] || 175000);
+  let base = Math.max(newPrice * residual(age, depr, cls, brand), FLOOR_VALUE[cls] || 175000);
   const adj = [];
   const expKm = Math.max(8000, Math.min(age*16000, 220000 + Math.max(0, age-14)*6000));
   const kmDiff = c.km - expKm;
@@ -1582,7 +1586,7 @@ function analyze(c){
   }
   if (perf > 1) adj.unshift(["Performans sürümü", 0]);
   const spread = known ? (cls==="p" ? 0.09 : 0.07) : 0.15;
-  const market = {min: mid*(1-spread), max: mid*(1+spread), mid, base, adj, confidence, depr};
+  const market = {min: mid*(1-spread), max: mid*(1+spread), mid, base, adj, confidence, depr, brand};
 
   // --- Issues ---
   const match = it => (!it.gear || it.gear.includes(c.gear)) && (!it.fuel || it.fuel.includes(c.fuel))
