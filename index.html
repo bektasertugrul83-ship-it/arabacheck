@@ -905,7 +905,82 @@ const DB = {
   "BYD":{grp:"ev",models:{"Atto 3":[1900000,70,"m"],"Seal":[2600000,70,"m"],"Dolphin":[1600000,70,"e"],"Seal U":[2400000,70,"m"]}},
   "MG":{grp:"cn",models:{"ZS":[1700000,66,"e"],"HS":[2200000,66,"m"],"MG4":[1800000,67,"m"]}}
 };
-const BRAND_ALIASES = {"tofas":"Tofaş","tofaş":"Tofaş","vw":"Volkswagen","volkswagen":"Volkswagen","mercedes":"Mercedes-Benz","mercedes-benz":"Mercedes-Benz","merc":"Mercedes-Benz","citroën":"Citroen","citroen":"Citroen","bmw":"BMW","byd":"BYD","mg":"MG","land-rover":"Land Rover","land rover":"Land Rover","landrover":"Land Rover","range rover":"Land Rover","alfa":"Alfa Romeo","alfa-romeo":"Alfa Romeo","alfa romeo":"Alfa Romeo","ds":"DS","ds automobiles":"DS","kgm":"SsangYong","ssangyong":"SsangYong","mini":"Mini","lexus":"Lexus"};
+// Ek modeller ve markalar: mevcut tabloya eklenir (aynı biçim: [Kasım 2026 sıfır/eşdeğer fiyat TL, güvenilirlik, sınıf]).
+// Güncel modellerde liste fiyatına yakın; üretimi bitenlerde bugünkü eşdeğer sınıf fiyatı (yaklaşık).
+const DB_EXTRA = {
+  "Fiat":{grp:"fiat",models:{"Panda":[1150000,68,"e"],"600":[1600000,66,"e"],"Grande Punto":[1100000,65,"e"],"Idea":[1100000,64,"e"],"Bravo":[1300000,64,"e"],"Stilo":[1200000,63,"e"],"Croma":[1500000,62,"m"],"Regata":[1000000,62,"e"],"Freemont":[2000000,62,"m"],"Fullback":[2400000,70,"m"],"Scudo":[2200000,68,"e"],"Ducato":[2600000,70,"m"],"Qubo":[1200000,68,"e"]}},
+  "Renault":{grp:"renault",models:{"Twingo":[1100000,66,"e"],"R5":[1700000,67,"e"],"Zoe":[1600000,68,"e"],"Arkana":[2300000,68,"m"],"Koleos":[2900000,66,"m"],"Rafale":[3300000,67,"m"],"Scenic":[2300000,65,"m"],"Grand Scenic":[2400000,65,"m"],"Espace":[3200000,62,"m"],"Latitude":[2200000,62,"m"],"Safrane":[1800000,60,"m"],"Modus":[1200000,64,"e"],"Trafic":[2500000,68,"m"],"Master":[2700000,68,"m"]}},
+  "Dacia":{grp:"renault",models:{"Spring":[1000000,68,"e"],"Lodgy":[1300000,70,"e"],"Dokker":[1200000,70,"e"],"Bigster":[2200000,70,"m"],"Solenza":[900000,65,"e"]}},
+  "Volkswagen":{grp:"vag",models:{"Up":[1300000,72,"e"],"Lupo":[1000000,66,"e"],"Fox":[1000000,66,"e"],"Taigo":[2300000,72,"m"],"Touran":[2700000,71,"m"],"Sharan":[3000000,69,"m"],"Amarok":[3800000,70,"m"],"CC":[2500000,66,"m"],"Phaeton":[3500000,62,"p"],"ID.3":[2400000,69,"m"],"ID.7":[3600000,69,"m"],"ID. Buzz":[4000000,68,"m"],"Caravelle":[4200000,70,"m"],"Multivan":[5000000,70,"m"],"Crafter":[3200000,70,"m"]}},
+  "Skoda":{grp:"vag",models:{"Citigo":[1100000,72,"e"],"Felicia":[900000,66,"e"],"Roomster":[1400000,71,"e"],"Yeti":[1900000,71,"m"],"Enyaq":[3200000,71,"m"]}},
+  "Seat":{grp:"vag",models:{"Mii":[1000000,70,"e"],"Cordoba":[1400000,68,"e"],"Altea":[1600000,68,"m"],"Exeo":[1900000,66,"m"],"Tarraco":[3200000,70,"m"],"Alhambra":[2800000,68,"m"]}},
+  "Cupra":{grp:"vag",models:{"Ateca":[3000000,70,"p"],"Terramar":[3300000,70,"p"],"Tavascan":[3300000,69,"p"]}},
+  "Audi":{grp:"vag",models:{"Q6":[8500000,67,"p"],"Q8 e-tron":[11000000,66,"p"],"R8":[18000000,66,"p"],"A2":[1500000,66,"p"]}},
+  "Porsche":{grp:"vag",models:{"Boxster":[10000000,73,"p"],"Cayman":[10500000,73,"p"]}},
+  "Toyota":{grp:"toyota",models:{"Aygo":[1300000,82,"e"],"Aygo X":[1500000,82,"e"],"Starlet":[900000,80,"e"],"Carina":[1500000,80,"m"],"Avensis":[2000000,84,"m"],"Verso":[2000000,82,"m"],"Prius":[2400000,84,"m"],"Corolla Cross":[2600000,85,"m"],"Highlander":[5500000,85,"p"],"bZ4X":[3000000,80,"m"],"Supra":[7000000,82,"p"],"GR86":[4000000,82,"p"],"Proace":[2500000,76,"m"]}},
+  "Lexus":{grp:"toyota",models:{"IS":[4500000,86,"p"],"LS":[12000000,85,"p"],"LM":[15000000,84,"p"],"CT":[2500000,86,"p"]}},
+  "Honda":{grp:"honda",models:{"e:Ny1":[2400000,78,"m"],"Prelude":[2600000,78,"m"],"FR-V":[1600000,78,"m"],"Integra":[1500000,78,"m"]}},
+  "Hyundai":{grp:"hk",models:{"i40":[2200000,74,"m"],"ix20":[1500000,74,"e"],"Matrix":[1100000,72,"e"],"Atos":[800000,70,"e"],"Inster":[1400000,75,"e"],"Sonata":[2600000,74,"m"],"Ioniq":[2000000,75,"m"],"Ioniq 6":[3300000,74,"m"],"Staria":[3800000,73,"m"],"Starex":[2500000,74,"m"],"H-1":[2500000,74,"m"],"Galloper":[1200000,66,"m"]}},
+  "Kia":{grp:"hk",models:{"Venga":[1400000,74,"e"],"Soul":[1700000,73,"e"],"Carens":[1800000,72,"m"],"Optima":[2400000,73,"m"],"XCeed":[2200000,75,"m"],"ProCeed":[2300000,74,"m"],"Stinger":[4000000,72,"p"],"EV3":[2400000,74,"m"],"EV9":[5500000,73,"p"],"Carnival":[4000000,72,"m"],"Shuma":[900000,64,"e"],"Sephia":[900000,64,"e"]}},
+  "Ford":{grp:"ford",models:{"Ka":[1000000,66,"e"],"Fusion":[1200000,66,"e"],"B-Max":[1300000,66,"e"],"S-Max":[2700000,65,"m"],"Galaxy":[2800000,65,"m"],"EcoSport":[1700000,66,"m"],"Edge":[3500000,65,"m"],"Explorer":[5000000,65,"p"],"Mustang Mach-E":[4000000,66,"p"],"Tourneo Courier":[1600000,70,"e"],"Tourneo Connect":[1900000,70,"e"],"Tourneo Custom":[2900000,70,"m"],"Sierra":[1500000,62,"m"],"Taunus":[900000,60,"e"]}},
+  "Opel":{grp:"opel",models:{"Adam":[1200000,65,"e"],"Karl":[1000000,65,"e"],"Agila":[900000,64,"e"],"Ascona":[1200000,62,"e"],"Antara":[2000000,62,"m"],"Frontera":[2100000,68,"m"],"Cascada":[2200000,63,"m"],"Vivaro":[2400000,68,"m"],"Movano":[2700000,68,"m"]}},
+  "Chevrolet":{grp:"opel",models:{"Lacetti":[1200000,64,"e"],"Kalos":[1000000,63,"e"],"Epica":[1500000,62,"m"],"Orlando":[1700000,64,"m"],"Trax":[1600000,64,"m"],"Camaro":[5000000,64,"p"],"Corvette":[9000000,64,"p"],"Tahoe":[8000000,62,"p"]}},
+  "Peugeot":{grp:"psa",models:{"106":[1000000,64,"e"],"107":[1000000,66,"e"],"108":[1100000,66,"e"],"205":[1000000,62,"e"],"207":[1300000,65,"e"],"405":[1500000,62,"m"],"607":[2200000,60,"m"],"807":[2400000,60,"m"],"RCZ":[2500000,63,"m"],"Expert":[2300000,68,"e"],"Boxer":[2600000,68,"m"],"Traveller":[3500000,67,"m"]}},
+  "Citroen":{grp:"psa",models:{"C1":[1000000,66,"e"],"C2":[1000000,63,"e"],"Saxo":[900000,62,"e"],"Xsara":[1100000,62,"e"],"C3 Picasso":[1400000,64,"e"],"C4 Picasso":[2000000,63,"m"],"C5":[2200000,63,"m"],"C5 X":[3000000,66,"m"],"C6":[2800000,60,"m"],"C8":[2300000,60,"m"],"Nemo":[1200000,66,"e"],"Jumpy":[2300000,68,"e"],"Jumper":[2600000,68,"m"],"SpaceTourer":[3300000,66,"m"]}},
+  "DS":{grp:"psa",models:{"DS 5":[3300000,62,"p"]}},
+  "BMW":{grp:"bmw",models:{"6 Serisi":[12000000,63,"p"],"i3":[3000000,66,"p"],"i5":[11000000,65,"p"],"i7":[25000000,63,"p"],"iX1":[4800000,66,"p"],"iX3":[7500000,66,"p"],"Z3":[3000000,64,"p"]}},
+  "Mini":{grp:"bmw",models:{"Paceman":[3000000,66,"p"],"Aceman":[3200000,67,"p"],"Cabrio":[3500000,66,"p"]}},
+  "Mercedes-Benz":{grp:"merc",models:{"190":[1800000,66,"m"],"CLK":[3000000,63,"p"],"SLK":[6000000,64,"p"],"SLC":[6000000,64,"p"],"SL":[16000000,64,"p"],"CL":[8000000,62,"p"],"AMG GT":[15000000,64,"p"],"ML":[8000000,63,"p"],"GL":[10000000,62,"p"],"R Serisi":[4000000,60,"p"],"X Serisi":[4500000,64,"p"],"EQB":[4500000,65,"p"],"EQC":[7000000,65,"p"],"EQS":[16000000,64,"p"],"Citan":[2200000,67,"e"]}},
+  "Volvo":{grp:"volvo",models:{"S40":[2200000,70,"m"],"S80":[3500000,68,"p"],"V50":[2000000,70,"m"],"V70":[2600000,70,"m"],"V90":[6500000,70,"p"],"C30":[1800000,68,"m"],"C40":[3200000,69,"p"],"EX40":[3200000,69,"p"],"EX90":[9000000,68,"p"],"XC70":[3500000,69,"p"],"850":[1500000,66,"m"],"940":[1500000,66,"m"]}},
+  "Jaguar":{grp:"lr",models:{"X-Type":[2500000,58,"p"],"S-Type":[3500000,58,"p"],"XJ":[9000000,57,"p"],"F-Type":[9000000,60,"p"]}},
+  "Alfa Romeo":{grp:"fiat",models:{"33":[1100000,58,"e"],"145":[1100000,58,"e"],"146":[1100000,58,"e"],"147":[1300000,60,"m"],"155":[1300000,58,"m"],"156":[1500000,60,"m"],"159":[1800000,60,"m"],"166":[2000000,58,"m"],"GT":[2000000,60,"m"],"Brera":[2500000,60,"p"]}},
+  "Maserati":{grp:"fiat",models:{"GranTurismo":[18000000,58,"p"],"MC20":[25000000,60,"p"]}},
+  "Jeep":{grp:"fiat",models:{"Cherokee":[4500000,62,"p"],"Patriot":[1800000,60,"m"],"Commander":[3500000,60,"p"],"Gladiator":[7000000,64,"p"]}},
+  "Nissan":{grp:"nissan",models:{"Sunny":[1100000,70,"e"],"Almera":[1200000,70,"e"],"Tiida":[1300000,69,"e"],"Primera":[1500000,68,"m"],"Pulsar":[1600000,68,"m"],"Terrano":[1600000,66,"m"],"Pathfinder":[3500000,68,"m"],"Murano":[3500000,67,"m"],"Patrol":[6000000,70,"p"],"Leaf":[2000000,68,"m"],"Ariya":[3200000,68,"m"],"Townstar":[1700000,70,"e"]}},
+  "Mazda":{grp:"mazda",models:{"5":[1800000,77,"m"],"Premacy":[1500000,75,"e"],"CX-3":[2100000,79,"m"],"CX-60":[4500000,78,"p"],"CX-7":[2300000,72,"m"],"CX-9":[3500000,75,"m"],"MX-5":[3500000,80,"m"],"MX-30":[2600000,77,"m"],"RX-8":[2500000,65,"m"],"BT-50":[2600000,76,"m"]}},
+  "Subaru":{grp:"mazda",models:{"Impreza":[2300000,77,"m"],"Legacy":[2600000,77,"m"],"Levorg":[2900000,77,"m"],"Crosstrek":[2800000,78,"m"],"Solterra":[3300000,76,"m"],"BRZ":[3500000,77,"m"]}},
+  "Suzuki":{grp:"suzuki",models:{"Alto":[800000,74,"e"],"Celerio":[950000,76,"e"],"Splash":[1000000,75,"e"],"Ignis":[1150000,76,"e"],"Baleno":[1200000,76,"e"],"SX4":[1500000,75,"e"],"Jimny":[2000000,78,"m"],"Grand Vitara":[2200000,76,"m"]}},
+  "Mitsubishi":{grp:"mitsu",models:{"Space Star":[1100000,73,"e"],"Attrage":[1000000,73,"e"],"Colt":[1200000,73,"e"],"Lancer":[1500000,74,"e"],"Carisma":[1300000,70,"e"],"Galant":[1500000,72,"m"],"Eclipse Cross":[2400000,74,"m"],"Pajero":[3500000,76,"m"]}},
+  "Isuzu":{grp:"mitsu",models:{"Rodeo":[1800000,76,"m"]}},
+  "SsangYong":{grp:"cn",models:{"Actyon":[2000000,64,"m"],"Kyron":[1800000,62,"m"],"Musso":[2600000,65,"m"]}},
+  "Tesla":{grp:"ev",models:{"Model S":[6000000,70,"p"],"Model X":[7000000,68,"p"]}},
+  "Chery":{grp:"cn",models:{"Tiggo 4 Pro":[1500000,66,"e"],"Tiggo 7":[1900000,66,"m"],"Tiggo 8":[2300000,66,"m"],"Tiggo 9":[2900000,66,"m"],"Arrizo 8":[1700000,65,"m"]}},
+  "BYD":{grp:"ev",models:{"Atto 2":[1500000,70,"e"],"Sealion 7":[2800000,70,"m"],"Han":[3500000,70,"p"],"Tang":[3500000,70,"p"]}},
+  "MG":{grp:"cn",models:{"MG3":[1300000,66,"e"],"MG5":[1500000,66,"e"],"Marvel R":[2500000,65,"m"],"Cyberster":[4000000,64,"p"]}},
+  // Türkiye'ye 2024-26'da gelen markalar
+  "Omoda":{grp:"cn",models:{"5":[1800000,66,"m"],"E5":[1900000,66,"m"],"7":[2300000,66,"m"]}},
+  "Jaecoo":{grp:"cn",models:{"5":[1600000,65,"m"],"7":[1900000,65,"m"]}},
+  "Leapmotor":{grp:"cn",models:{"T03":[1100000,65,"e"],"B10":[1800000,65,"m"],"C10":[2200000,65,"m"]}},
+  "Geely":{grp:"cn",models:{"Emgrand":[1300000,62,"e"],"EX5":[2000000,64,"m"],"Starray":[2000000,64,"m"]}},
+  "Haval":{grp:"cn",models:{"Jolion":[1700000,64,"m"],"H6":[2200000,64,"m"]}},
+  "Skywell":{grp:"cn",models:{"ET5":[2000000,62,"m"]}},
+  "Zeekr":{grp:"ev",models:{"X":[2800000,66,"p"],"001":[4000000,66,"p"],"7X":[3800000,66,"p"]}},
+  "XPeng":{grp:"ev",models:{"G6":[2600000,66,"m"],"G9":[3800000,66,"p"]}},
+  "Lynk & Co":{grp:"cn",models:{"01":[2500000,66,"m"]}},
+  "Hongqi":{grp:"cn",models:{"H5":[2500000,60,"m"],"E-HS9":[6000000,60,"p"]}},
+  "DFSK":{grp:"cn",models:{"Glory":[1500000,60,"m"],"Seres 3":[1600000,60,"m"]}},
+  // Eski ve az bulunan markalar
+  "Lada":{grp:"old",models:{"2107":[700000,55,"e"],"Samara":[900000,58,"e"],"Kalina":[900000,58,"e"],"Vesta":[1200000,62,"e"],"Niva":[1500000,62,"m"]}},
+  "Daewoo":{grp:"old",models:{"Tico":[600000,55,"e"],"Matiz":[700000,58,"e"],"Racer":[800000,55,"e"],"Lanos":[1000000,60,"e"],"Nubira":[1100000,60,"e"],"Espero":[1100000,58,"e"],"Leganza":[1300000,58,"m"]}},
+  "Proton":{grp:"old",models:{"Saga":[900000,58,"e"],"Persona":[1000000,58,"e"],"Gen-2":[1000000,58,"e"]}},
+  "Rover":{grp:"old",models:{"200":[1100000,55,"e"],"25":[1100000,55,"e"],"400":[1300000,55,"e"],"45":[1300000,55,"e"],"600":[1600000,55,"m"],"75":[1800000,56,"m"]}},
+  "Saab":{grp:"old",models:{"9-3":[2000000,60,"m"],"9-5":[2500000,58,"m"]}},
+  "Lancia":{grp:"fiat",models:{"Ypsilon":[1300000,60,"e"],"Delta":[1700000,58,"m"],"Thema":[2000000,56,"m"]}},
+  "Smart":{grp:"old",models:{"ForTwo":[1500000,65,"e"],"ForFour":[1500000,65,"e"],"#1":[2500000,66,"m"],"#3":[2700000,66,"m"]}},
+  "Infiniti":{grp:"nissan",models:{"Q30":[2500000,64,"p"],"Q50":[3500000,64,"p"],"QX70":[4000000,62,"p"]}},
+  "Dodge":{grp:"old",models:{"Caliber":[1500000,56,"m"],"Journey":[2000000,58,"m"],"Nitro":[2000000,56,"m"],"Charger":[5500000,62,"p"],"Challenger":[6000000,62,"p"],"Ram":[6000000,64,"p"]}},
+  "Chrysler":{grp:"old",models:{"PT Cruiser":[1300000,55,"m"],"Sebring":[1500000,56,"m"],"300C":[3500000,58,"p"]}},
+  "Cadillac":{grp:"old",models:{"CTS":[3500000,58,"p"],"Escalade":[15000000,60,"p"]}},
+  "Iveco":{grp:"old",models:{"Daily":[2800000,70,"m"]}},
+  // Lüks ve süper spor (Türkiye'de ÖTV nedeniyle çok yüksek fiyatlı; tahminler kaba)
+  "Bentley":{grp:"lux",models:{"Continental":[28000000,65,"p"],"Flying Spur":[28000000,64,"p"],"Bentayga":[30000000,66,"p"]}},
+  "Ferrari":{grp:"lux",models:{"Roma":[25000000,70,"p"],"Portofino":[24000000,70,"p"],"296":[30000000,70,"p"],"F8":[30000000,70,"p"],"812":[40000000,70,"p"],"SF90":[45000000,70,"p"],"Purosangue":[50000000,70,"p"]}},
+  "Lamborghini":{grp:"lux",models:{"Huracan":[30000000,68,"p"],"Urus":[35000000,68,"p"],"Revuelto":[60000000,68,"p"]}},
+  "Rolls-Royce":{grp:"lux",models:{"Ghost":[45000000,70,"p"],"Cullinan":[50000000,70,"p"],"Phantom":[60000000,70,"p"]}},
+  "Aston Martin":{grp:"lux",models:{"Vantage":[18000000,64,"p"],"DB11":[22000000,64,"p"],"DBX":[24000000,64,"p"]}}
+};
+Object.entries(DB_EXTRA).forEach(([b, v]) => { if (DB[b]) Object.assign(DB[b].models, v.models); else DB[b] = v; });
+const BRAND_ALIASES = {"tofas":"Tofaş","tofaş":"Tofaş","rolls royce":"Rolls-Royce","rolls-royce":"Rolls-Royce","rolls":"Rolls-Royce","aston martin":"Aston Martin","aston-martin":"Aston Martin","lynk":"Lynk & Co","lynk&co":"Lynk & Co","lynk & co":"Lynk & Co","lynk-co":"Lynk & Co","gwm":"Haval","great wall":"Haval","mercedes benz":"Mercedes-Benz","chevy":"Chevrolet","lambo":"Lamborghini","x-peng":"XPeng","xpeng":"XPeng","dongfeng":"DFSK","seres":"DFSK","vw":"Volkswagen","volkswagen":"Volkswagen","mercedes":"Mercedes-Benz","mercedes-benz":"Mercedes-Benz","merc":"Mercedes-Benz","citroën":"Citroen","citroen":"Citroen","bmw":"BMW","byd":"BYD","mg":"MG","land-rover":"Land Rover","land rover":"Land Rover","landrover":"Land Rover","range rover":"Land Rover","alfa":"Alfa Romeo","alfa-romeo":"Alfa Romeo","alfa romeo":"Alfa Romeo","ds":"DS","ds automobiles":"DS","kgm":"SsangYong","ssangyong":"SsangYong","mini":"Mini","lexus":"Lexus"};
 const CLASS_DEFAULT = {e:1600000,m:2600000,p:6000000};
 // Markanın ilk 5 yıldaki yıllık değer koruma oranı (Türkiye ikinci el, sabit TL).
 // Kasım 2026 ilan fiyatlarıyla kalibre: 2020 Passat ≈ sıfırın %50'si, 2018 Egea ≈ %49, 2019 C 200 ≈ %47,
@@ -915,11 +990,14 @@ const BRAND_DEPR = {
   "Hyundai":0.903,"Kia":0.9,"Ford":0.892,"Opel":0.89,"Chevrolet":0.88,"Peugeot":0.89,"Citroen":0.887,"DS":0.87,"Nissan":0.893,"Mazda":0.895,
   "Subaru":0.895,"Suzuki":0.9,"Mitsubishi":0.895,"Isuzu":0.905,"Audi":0.895,"BMW":0.897,"Mercedes-Benz":0.902,"Mini":0.893,"Porsche":0.91,
   "Volvo":0.888,"Land Rover":0.885,"Jaguar":0.865,"Alfa Romeo":0.9,"Maserati":0.86,"Jeep":0.885,"SsangYong":0.875,
-  "Togg":0.893,"Tesla":0.885,"BYD":0.875,"Chery":0.86,"MG":0.865
+  "Togg":0.893,"Tesla":0.885,"BYD":0.875,"Chery":0.86,"MG":0.865,
+  "Tofaş":0.905,"Omoda":0.865,"Jaecoo":0.865,"Leapmotor":0.855,"Geely":0.855,"Haval":0.865,"Skywell":0.84,"Zeekr":0.855,"XPeng":0.855,
+  "Lynk & Co":0.855,"Hongqi":0.84,"DFSK":0.84,"Lada":0.88,"Daewoo":0.87,"Proton":0.86,"Rover":0.85,"Saab":0.86,"Lancia":0.86,"Smart":0.885,
+  "Infiniti":0.87,"Dodge":0.87,"Chrysler":0.86,"Cadillac":0.86,"Iveco":0.9,"Bentley":0.88,"Ferrari":0.93,"Lamborghini":0.92,"Rolls-Royce":0.9,"Aston Martin":0.88
 };
 // Sıfırı pahalı araçların ikinci el talebi dar: 5 M ₺ üstünde değer kaybı belirgin hızlanır.
 // Güçlü marka imajı bunu yumuşatır (2021 Cayenne ≈ sıfırın %46'sı, 2020 E 200 ≈ %39; 2018 520i ≈ %28).
-const TIER_BRAND = {"Porsche":0.5,"Lexus":0.5,"Toyota":0.5,"Mercedes-Benz":0.62,"Volvo":0.9};
+const TIER_BRAND = {"Porsche":0.5,"Lexus":0.5,"Toyota":0.5,"Mercedes-Benz":0.62,"Volvo":0.9,"Ferrari":0.35,"Lamborghini":0.45,"Rolls-Royce":0.7,"Bentley":0.9};
 function tierPenalty(np){
   if (np <= 5e6) return 0;
   if (np <= 7e6) return (np - 5e6) / 2e6 * 0.015;
@@ -1882,8 +1960,8 @@ function renderDeal(r){
   const gearA = {Otomatik:"otomatik", Manuel:"duz", "Yarı Otomatik":"yari-otomatik"}[c.gear];
   const fuelA = {Benzin:"benzin", Dizel:"dizel", LPG:"lpg", Hibrit:"hibrit", Elektrik:"elektrik"}[c.fuel];
   const pkg = (c.engine||"").trim();
-  const isSuv = /^(x\d|q\d|xc\d|gl[a-z]|g serisi|eq[ab]|t-roc|t-cross|tiguan|touareg|id\.4|kodiaq|karoq|kamiq|elroq|arona|ateca|formentor|duster|captur|kadjar|austral|qashqai|juke|x-trail|navara|cx-|c-hr|rav4|hilux|land cruiser|yaris cross|hr-v|cr-v|zr-v|bayon|tucson|ix35|kona|santa fe|ioniq 5|sportage|stonic|sorento|niro|ev6|kuga|puma|ranger|mokka|crossland|grandland|2008|3008|5008|c3 aircross|c5 aircross|ds 7|t10x|model y|tiggo|omoda|atto|seal u|zs|hs|vitara|s-cross|l200|asx|outlander|d-max|renegade|compass|avenger|wrangler|grand cherokee|cayenne|macan|range rover|discovery|defender|freelander|f-pace|e-pace|i-pace|stelvio|tonale|levante|grecale|countryman|ux|nx|rx|lbx|xv|forester|outback|korando|tivoli|rexton|torres)/i.test(r.model);
-  const isVan = /^(doblo|fiorino|caddy|transporter|custom|vito|v serisi|sprinter|courier|connect|combo|rifter|partner|berlingo|proace)/i.test(r.model);
+  const isSuv = /^(x\d|q\d|xc\d|gl[a-z]|g serisi|eq[ab]|t-roc|t-cross|tiguan|touareg|id\.4|kodiaq|karoq|kamiq|elroq|arona|ateca|formentor|duster|captur|kadjar|austral|qashqai|juke|x-trail|navara|cx-|c-hr|rav4|hilux|land cruiser|yaris cross|hr-v|cr-v|zr-v|bayon|tucson|ix35|kona|santa fe|ioniq 5|sportage|stonic|sorento|niro|ev6|kuga|puma|ranger|mokka|crossland|grandland|2008|3008|5008|c3 aircross|c5 aircross|ds 7|t10x|model y|tiggo|omoda|atto|seal u|zs|hs|vitara|s-cross|l200|asx|outlander|d-max|renegade|compass|avenger|wrangler|grand cherokee|cayenne|macan|range rover|discovery|defender|freelander|f-pace|e-pace|i-pace|stelvio|tonale|levante|grecale|countryman|ux|nx|rx|lbx|xv|forester|outback|korando|tivoli|rexton|torres|taigo|amarok|yeti|enyaq|tarraco|terramar|tavascan|q6|aygo x|corolla cross|highlander|bz4x|ev3|ev9|ecosport|edge|explorer|mustang mach-e|antara|frontera|trax|tahoe|koleos|arkana|rafale|bigster|cherokee|patriot|commander|gladiator|pathfinder|patrol|murano|ariya|terrano|cx-3|cx-60|cx-7|cx-9|bt-50|crosstrek|solterra|jimny|grand vitara|pajero|eclipse cross|rodeo|actyon|kyron|musso|model x|jolion|h6|et5|7x|g6|g9|e-hs9|h5|glory|niva|bentayga|urus|cullinan|dbx|purosangue|c40|ex40|ex90|xc70|ml|gl|eqb|eqc|x serisi|ix1|ix3|aceman|paceman|sealion|tang|marvel|starray|ex5|b10|c10|e5|galloper)/i.test(r.model) || /^(Omoda|Jaecoo|Haval|Zeekr|Leapmotor)$/.test(r.brand) && !/^t03$/i.test(r.model);
+  const isVan = /^(doblo|fiorino|qubo|scudo|ducato|caddy|transporter|caravelle|multivan|crafter|id\. buzz|custom|vito|v serisi|sprinter|citan|courier|connect|tourneo|transit|combo|vivaro|movano|rifter|partner|expert|boxer|traveller|bipper|berlingo|nemo|jumpy|jumper|spacetourer|kangoo|dokker|trafic|master|townstar|proace|staria|starex|h-1|daily)/i.test(r.model);
   // arabam Mercedes serilerini tek harfle yazar (mercedes-benz-c, -e, -s); diğerleri seri adının kendisi
   const arbModel = /^Mercedes/.test(r.brand) ? slug(r.model.replace(/\s*Serisi$/i, "")) : slug(r.model);
   const arbQs = `minyear=${y}&maxyear=${y}&maxprice=${max}&maxkm=${kmMax}`;
