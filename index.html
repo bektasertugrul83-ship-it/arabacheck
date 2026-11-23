@@ -862,10 +862,11 @@ html.app #view-history:not(.hidden){display:block;padding-top:14px}
 // newPrice: Kasım 2026 Türkiye sıfır liste fiyatına yakın (TL, giriş/orta donanım; ÖTV+KDV dahil).
 // Üretimi biten modellerde bugünkü eşdeğer sınıf fiyatı. rel: genel güvenilirlik (0-100). cls: e=ekonomi, m=orta, p=premium
 const DB = {
-  "Fiat":{grp:"fiat",models:{"Egea":[1550000,74,"e"],"Egea Cross":[1750000,73,"e"],"Linea":[1300000,66,"e"],"Doblo":[1700000,70,"e"],"Fiorino":[1300000,70,"e"],"500":[1500000,65,"e"],"Tipo":[1600000,72,"e"],"Punto":[1100000,65,"e"]}},
-  "Renault":{grp:"renault",models:{"Clio":[1850000,70,"e"],"Megane":[2100000,68,"m"],"Fluence":[1550000,69,"m"],"Symbol":[1150000,70,"e"],"Taliant":[1400000,71,"e"],"Captur":[2100000,68,"m"],"Kadjar":[2300000,67,"m"],"Austral":[2800000,68,"m"],"Talisman":[2600000,64,"m"]}},
+  "Tofaş":{grp:"fiat",models:{"Şahin":[1200000,70,"e"],"Doğan":[1250000,70,"e"],"Kartal":[1250000,70,"e"],"Murat 131":[1200000,68,"e"],"Serçe":[1000000,66,"e"]}},
+  "Fiat":{grp:"fiat",models:{"Tempra":[1350000,66,"e"],"Uno":[1000000,66,"e"],"Palio":[1050000,66,"e"],"Albea":[1150000,67,"e"],"Siena":[1150000,67,"e"],"Brava":[1250000,65,"e"],"Marea":[1350000,64,"e"],"Egea":[1550000,74,"e"],"Egea Cross":[1750000,73,"e"],"Linea":[1300000,66,"e"],"Doblo":[1700000,70,"e"],"Fiorino":[1300000,70,"e"],"500":[1500000,65,"e"],"Tipo":[1600000,72,"e"],"Punto":[1100000,65,"e"]}},
+  "Renault":{grp:"renault",models:{"Clio":[1850000,70,"e"],"Megane":[2100000,68,"m"],"Fluence":[1550000,69,"m"],"Symbol":[1150000,70,"e"],"Taliant":[1400000,71,"e"],"Captur":[2100000,68,"m"],"Kadjar":[2300000,67,"m"],"Austral":[2800000,68,"m"],"Talisman":[2600000,64,"m"],"Toros":[1200000,70,"e"],"R 12":[1200000,70,"e"],"Broadway":[1200000,68,"e"],"R 9":[1200000,68,"e"],"R 19":[1300000,67,"e"],"Laguna":[2000000,63,"m"],"Kangoo":[1500000,69,"e"]}},
   "Dacia":{grp:"renault",models:{"Sandero":[1350000,72,"e"],"Logan":[1250000,73,"e"],"Duster":[1950000,72,"e"],"Jogger":[1600000,71,"e"]}},
-  "Volkswagen":{grp:"vag",models:{"Polo":[1850000,72,"e"],"Golf":[2700000,73,"m"],"Passat":[4000000,72,"m"],"Jetta":[2000000,72,"m"],"Tiguan":[3600000,71,"m"],"T-Roc":[2700000,72,"m"],"T-Cross":[2200000,72,"m"],"Caddy":[2200000,73,"e"],"Transporter":[3600000,72,"m"],"Scirocco":[2000000,68,"m"],"Arteon":[4600000,70,"p"],"Touareg":[9500000,68,"p"],"ID.4":[2900000,70,"m"]}},
+  "Volkswagen":{grp:"vag",models:{"Polo":[1850000,72,"e"],"Golf":[2700000,73,"m"],"Passat":[4000000,72,"m"],"Jetta":[2000000,72,"m"],"Tiguan":[3600000,71,"m"],"Vento":[1600000,70,"e"],"Bora":[1700000,70,"m"],"Beetle":[2000000,68,"m"],"T-Roc":[2700000,72,"m"],"T-Cross":[2200000,72,"m"],"Caddy":[2200000,73,"e"],"Transporter":[3600000,72,"m"],"Scirocco":[2000000,68,"m"],"Arteon":[4600000,70,"p"],"Touareg":[9500000,68,"p"],"ID.4":[2900000,70,"m"]}},
   "Skoda":{grp:"vag",models:{"Fabia":[1700000,74,"e"],"Octavia":[2600000,75,"m"],"Superb":[4000000,74,"m"],"Kamiq":[2100000,73,"m"],"Karoq":[2600000,73,"m"],"Kodiaq":[3300000,73,"m"],"Scala":[1950000,73,"m"],"Rapid":[1450000,72,"e"],"Elroq":[2700000,72,"m"]}},
   "Seat":{grp:"vag",models:{"Ibiza":[1700000,71,"e"],"Leon":[2300000,71,"m"],"Arona":[2000000,71,"m"],"Ateca":[2600000,71,"m"],"Toledo":[1500000,70,"e"]}},
   "Cupra":{grp:"vag",models:{"Formentor":[3200000,70,"p"],"Leon":[2900000,70,"m"],"Born":[2400000,70,"m"]}},
@@ -874,12 +875,12 @@ const DB = {
   "Toyota":{grp:"toyota",models:{"Corolla":[2200000,85,"m"],"Yaris":[1800000,84,"e"],"Yaris Cross":[2100000,84,"e"],"C-HR":[2900000,84,"m"],"Auris":[1750000,83,"m"],"RAV4":[3800000,85,"m"],"Hilux":[3100000,86,"m"],"Camry":[4200000,86,"m"],"Proace City":[1800000,76,"e"],"Land Cruiser":[12000000,86,"p"]}},
   "Lexus":{grp:"toyota",models:{"UX":[4000000,86,"p"],"NX":[6000000,86,"p"],"ES":[5500000,87,"p"],"RX":[9000000,86,"p"],"LBX":[3000000,86,"p"]}},
   "Honda":{grp:"honda",models:{"Civic":[2800000,81,"m"],"City":[1600000,80,"e"],"Jazz":[1800000,82,"e"],"HR-V":[2600000,80,"m"],"CR-V":[3800000,81,"m"],"Accord":[3500000,80,"m"],"ZR-V":[3100000,80,"m"]}},
-  "Hyundai":{grp:"hk",models:{"i20":[1600000,76,"e"],"i10":[1250000,76,"e"],"i30":[2000000,75,"m"],"Accent Blue":[1200000,77,"e"],"Accent":[1100000,76,"e"],"Elantra":[2200000,76,"m"],"Bayon":[1700000,75,"e"],"Tucson":[3100000,75,"m"],"ix35":[2600000,74,"m"],"Kona":[2300000,75,"m"],"Santa Fe":[4200000,74,"m"],"Ioniq 5":[3200000,74,"m"]}},
+  "Hyundai":{grp:"hk",models:{"i20":[1600000,76,"e"],"i10":[1250000,76,"e"],"i30":[2000000,75,"m"],"Accent Blue":[1200000,77,"e"],"Accent Era":[1150000,76,"e"],"Getz":[1050000,75,"e"],"Excel":[1000000,72,"e"],"Accent":[1100000,76,"e"],"Elantra":[2200000,76,"m"],"Bayon":[1700000,75,"e"],"Tucson":[3100000,75,"m"],"ix35":[2600000,74,"m"],"Kona":[2300000,75,"m"],"Santa Fe":[4200000,74,"m"],"Ioniq 5":[3200000,74,"m"]}},
   "Kia":{grp:"hk",models:{"Rio":[1450000,76,"e"],"Ceed":[1900000,75,"m"],"Cerato":[1800000,76,"m"],"Sportage":[3000000,75,"m"],"Stonic":[1800000,75,"e"],"Picanto":[1150000,76,"e"],"Sorento":[4200000,74,"m"],"Niro":[2500000,75,"m"],"EV6":[3500000,74,"m"]}},
-  "Ford":{grp:"ford",models:{"Focus":[2200000,68,"m"],"Fiesta":[1450000,68,"e"],"Kuga":[3200000,67,"m"],"Puma":[2300000,69,"m"],"Mondeo":[2600000,67,"m"],"Courier":[1550000,70,"e"],"Connect":[1800000,70,"e"],"Custom":[2600000,70,"m"],"Ranger":[3300000,72,"m"],"C-Max":[1700000,66,"m"],"Mustang":[6000000,68,"p"]}},
-  "Opel":{grp:"opel",models:{"Astra":[2300000,68,"m"],"Corsa":[1700000,69,"e"],"Insignia":[3000000,66,"m"],"Mokka":[2200000,68,"m"],"Crossland":[1950000,68,"m"],"Grandland":[2800000,68,"m"],"Combo":[1700000,70,"e"],"Vectra":[1600000,64,"m"]}},
+  "Ford":{grp:"ford",models:{"Focus":[2200000,68,"m"],"Fiesta":[1450000,68,"e"],"Kuga":[3200000,67,"m"],"Puma":[2300000,69,"m"],"Mondeo":[2600000,67,"m"],"Courier":[1550000,70,"e"],"Connect":[1800000,70,"e"],"Custom":[2600000,70,"m"],"Ranger":[3300000,72,"m"],"C-Max":[1700000,66,"m"],"Mustang":[6000000,68,"p"],"Escort":[1400000,66,"e"],"Mondeo Eski":[2000000,65,"m"],"Transit":[2400000,70,"m"]}},
+  "Opel":{grp:"opel",models:{"Astra":[2300000,68,"m"],"Corsa":[1700000,69,"e"],"Insignia":[3000000,66,"m"],"Mokka":[2200000,68,"m"],"Crossland":[1950000,68,"m"],"Grandland":[2800000,68,"m"],"Combo":[1700000,70,"e"],"Vectra":[1600000,64,"m"],"Kadett":[1300000,64,"e"],"Omega":[2000000,63,"m"],"Tigra":[1300000,62,"e"],"Zafira":[2000000,65,"m"],"Meriva":[1600000,66,"e"]}},
   "Chevrolet":{grp:"opel",models:{"Cruze":[1500000,66,"e"],"Aveo":[1200000,65,"e"],"Captiva":[2000000,64,"m"],"Spark":[900000,65,"e"]}},
-  "Peugeot":{grp:"psa",models:{"208":[1700000,68,"e"],"2008":[2100000,67,"m"],"301":[1400000,69,"e"],"308":[2300000,67,"m"],"408":[2700000,67,"m"],"3008":[3200000,67,"m"],"5008":[3600000,66,"m"],"508":[3600000,66,"m"],"Rifter":[1900000,69,"e"],"Partner":[1650000,70,"e"]}},
+  "Peugeot":{grp:"psa",models:{"208":[1700000,68,"e"],"2008":[2100000,67,"m"],"301":[1400000,69,"e"],"308":[2300000,67,"m"],"408":[2700000,67,"m"],"3008":[3200000,67,"m"],"5008":[3600000,66,"m"],"508":[3600000,66,"m"],"Rifter":[1900000,69,"e"],"Partner":[1650000,70,"e"],"206":[1400000,66,"e"],"306":[1500000,65,"e"],"307":[1700000,65,"e"],"406":[2000000,64,"m"],"407":[2200000,64,"m"],"Bipper":[1300000,68,"e"]}},
   "Citroen":{grp:"psa",models:{"C3":[1350000,67,"e"],"C3 Aircross":[1700000,67,"e"],"C-Elysee":[1400000,69,"e"],"C4":[2050000,67,"m"],"C4 Cactus":[1750000,67,"m"],"C5 Aircross":[2900000,67,"m"],"Berlingo":[1750000,70,"e"],"C4 X":[2050000,67,"m"]}},
   "DS":{grp:"psa",models:{"DS 3":[2500000,64,"p"],"DS 4":[3200000,64,"p"],"DS 7":[4000000,64,"p"],"DS 9":[5000000,63,"p"]}},
   "BMW":{grp:"bmw",models:{"1 Serisi":[3800000,66,"p"],"2 Serisi":[4300000,66,"p"],"3 Serisi":[6000000,66,"p"],"4 Serisi":[7000000,66,"p"],"5 Serisi":[9400000,65,"p"],"7 Serisi":[20000000,63,"p"],"8 Serisi":[16000000,64,"p"],"X1":[4600000,67,"p"],"X2":[5000000,67,"p"],"X3":[8000000,66,"p"],"X4":[9000000,66,"p"],"X5":[19000000,64,"p"],"X6":[21000000,63,"p"],"X7":[26000000,63,"p"],"i4":[6500000,67,"p"],"iX":[13000000,66,"p"],"Z4":[7000000,67,"p"]}},
@@ -892,7 +893,7 @@ const DB = {
   "Maserati":{grp:"fiat",models:{"Ghibli":[12000000,58,"p"],"Levante":[15000000,58,"p"],"Grecale":[10000000,60,"p"],"Quattroporte":[18000000,57,"p"]}},
   "Jeep":{grp:"fiat",models:{"Renegade":[2400000,64,"m"],"Compass":[3000000,64,"m"],"Avenger":[2000000,65,"m"],"Wrangler":[6500000,65,"p"],"Grand Cherokee":[9000000,63,"p"]}},
   "Nissan":{grp:"nissan",models:{"Qashqai":[2600000,70,"m"],"Juke":[2100000,69,"m"],"Micra":[1350000,71,"e"],"X-Trail":[3300000,70,"m"],"Note":[1350000,71,"e"],"Navara":[3000000,71,"m"]}},
-  "Mazda":{grp:"mazda",models:{"3":[2200000,80,"m"],"CX-5":[3200000,79,"m"],"CX-30":[2600000,79,"m"],"6":[2800000,79,"m"],"2":[1600000,80,"e"]}},
+  "Mazda":{grp:"mazda",models:{"3":[2200000,80,"m"],"323":[1500000,77,"e"],"626":[1900000,76,"m"],"CX-5":[3200000,79,"m"],"CX-30":[2600000,79,"m"],"6":[2800000,79,"m"],"2":[1600000,80,"e"]}},
   "Subaru":{grp:"mazda",models:{"XV":[2600000,78,"m"],"Forester":[3400000,78,"m"],"Outback":[3800000,78,"m"]}},
   "Suzuki":{grp:"suzuki",models:{"Vitara":[2000000,76,"m"],"Swift":[1400000,77,"e"],"S-Cross":[2300000,76,"m"]}},
   "Mitsubishi":{grp:"mitsu",models:{"L200":[2800000,77,"m"],"ASX":[1900000,74,"m"],"Outlander":[3200000,74,"m"]}},
@@ -904,7 +905,7 @@ const DB = {
   "BYD":{grp:"ev",models:{"Atto 3":[1900000,70,"m"],"Seal":[2600000,70,"m"],"Dolphin":[1600000,70,"e"],"Seal U":[2400000,70,"m"]}},
   "MG":{grp:"cn",models:{"ZS":[1700000,66,"e"],"HS":[2200000,66,"m"],"MG4":[1800000,67,"m"]}}
 };
-const BRAND_ALIASES = {"vw":"Volkswagen","volkswagen":"Volkswagen","mercedes":"Mercedes-Benz","mercedes-benz":"Mercedes-Benz","merc":"Mercedes-Benz","citroën":"Citroen","citroen":"Citroen","bmw":"BMW","byd":"BYD","mg":"MG","land-rover":"Land Rover","land rover":"Land Rover","landrover":"Land Rover","range rover":"Land Rover","alfa":"Alfa Romeo","alfa-romeo":"Alfa Romeo","alfa romeo":"Alfa Romeo","ds":"DS","ds automobiles":"DS","kgm":"SsangYong","ssangyong":"SsangYong","mini":"Mini","lexus":"Lexus"};
+const BRAND_ALIASES = {"tofas":"Tofaş","tofaş":"Tofaş","vw":"Volkswagen","volkswagen":"Volkswagen","mercedes":"Mercedes-Benz","mercedes-benz":"Mercedes-Benz","merc":"Mercedes-Benz","citroën":"Citroen","citroen":"Citroen","bmw":"BMW","byd":"BYD","mg":"MG","land-rover":"Land Rover","land rover":"Land Rover","landrover":"Land Rover","range rover":"Land Rover","alfa":"Alfa Romeo","alfa-romeo":"Alfa Romeo","alfa romeo":"Alfa Romeo","ds":"DS","ds automobiles":"DS","kgm":"SsangYong","ssangyong":"SsangYong","mini":"Mini","lexus":"Lexus"};
 const CLASS_DEFAULT = {e:1600000,m:2600000,p:6000000};
 // Markanın ilk 5 yıldaki yıllık değer koruma oranı (Türkiye ikinci el, sabit TL).
 // Kasım 2026 ilan fiyatlarıyla kalibre: 2020 Passat ≈ sıfırın %50'si, 2018 Egea ≈ %49, 2019 C 200 ≈ %47,
@@ -925,11 +926,16 @@ function tierPenalty(np){
   if (np <= 9e6) return 0.015 + (np - 7e6) / 2e6 * 0.07;
   return Math.min(0.1, 0.085 + (np - 9e6) / 20e6 * 0.015);
 }
-// Kalan değer oranı: ilk yıl düşüşü, 5 yıl hızlı, sonra yavaş (Türkiye'de eski araçlar değerini korur)
-function residual(age, d){
+// Kalan değer oranı: ilk yıl düşüşü, 5 yıl hızlı, 6-13 yaş yavaş, 13 yaştan sonra yeniden hızlanır.
+// 13+ yaşta araçlar "taban fiyata" yaklaşır (Kasım 2026 ilanları: 2008 Focus ≈ 500 B, 2000 Passat ≈ 460 B,
+// 1995 Vectra ≈ 220 B, 1995 Şahin ≈ 185 B, 1995 318i ≈ 295 B ₺); premium eski araçlar daha hızlı düşer.
+function residual(age, d, cls){
   if (age <= 0) return 0.9;
-  return 0.85 * Math.pow(d, Math.min(age, 5)) * Math.pow(0.975, Math.max(0, age - 5));
+  const tail = cls === "p" ? 0.89 : 0.91;
+  return 0.85 * Math.pow(d, Math.min(age, 5)) * Math.pow(0.975, Math.min(8, Math.max(0, age - 5))) * Math.pow(tail, Math.max(0, age - 13));
 }
+// Çalışır durumdaki bir aracın sınıfına göre taban değeri (TL, Kasım 2026)
+const FLOOR_VALUE = {e:175000, m:200000, p:240000};
 // Performans sürümleri (AMG 43/63, BMW M, Audi RS/S, Porsche Turbo/GTS…) standart modelden belirgin pahalıdır
 function perfFactor(brand, model, engine){
   const t = norm((model||"") + " " + (engine||""));
@@ -1497,7 +1503,7 @@ function parseComps(text){
   return out.filter(x => { const k = x.price+"|"+x.km+"|"+x.year; if (seen.has(k)) return false; seen.add(k); return true; });
 }
 const median = a => { const b = [...a].sort((x,y)=>x-y), n = b.length; return n ? (n%2 ? b[(n-1)/2] : (b[n/2-1]+b[n/2])/2) : 0; };
-const kmAdjFor = (km, year) => { const exp = Math.max(8000, Math.max(0, NOW_YEAR-year)*16000), d = km - exp; return d > 0 ? -Math.min(0.2, d/10000*0.011) : Math.min(0.07, -d/10000*0.007); };
+const kmAdjFor = (km, year) => { const ag = Math.max(0, NOW_YEAR-year), exp = Math.max(8000, Math.min(ag*16000, 220000 + Math.max(0, ag-14)*6000)), d = km - exp; return d > 0 ? -Math.min(0.2, d/10000*0.011) : Math.min(0.07, -d/10000*0.007); };
 function calibrate(market, c, cls, age){
   const comps = (c.comps || []).filter(x => x && x.price > 0);
   if (!comps.length) return market;
@@ -1506,7 +1512,7 @@ function calibrate(market, c, cls, age){
   // her ilanı bu aracın yılına ve km'sine çevir
   let adjd = comps.map(x => {
     let v = x.price;
-    if (x.year && x.year !== c.year) v *= residual(NOW_YEAR - c.year, depr) / residual(NOW_YEAR - x.year, depr);
+    if (x.year && x.year !== c.year) v *= residual(NOW_YEAR - c.year, depr, cls) / residual(NOW_YEAR - x.year, depr, cls);
     if (x.km != null) v *= (1 + subjKm) / (1 + kmAdjFor(x.km, x.year || c.year));
     return {...x, adj: v};
   });
@@ -1549,9 +1555,9 @@ function analyze(c){
   // --- Market value ---
   // Marka bazlı yıllık değer koruma; çok pahalı (lüks) modeller daha hızlı kaybeder
   const depr = ((brand && BRAND_DEPR[brand]) || (cls==="p" ? 0.89 : cls==="m" ? 0.895 : 0.9)) - tierPenalty(newPrice) * ((brand && TIER_BRAND[brand]) ?? 1);
-  let base = newPrice * Math.max(0.1, residual(age, depr));
+  let base = Math.max(newPrice * residual(age, depr, cls), FLOOR_VALUE[cls] || 175000);
   const adj = [];
-  const expKm = Math.max(8000, age*16000);
+  const expKm = Math.max(8000, Math.min(age*16000, 220000 + Math.max(0, age-14)*6000));
   const kmDiff = c.km - expKm;
   let kmAdj = kmDiff > 0 ? -Math.min(0.2, kmDiff/10000*0.011) : Math.min(0.07, -kmDiff/10000*0.007);
   adj.push(["Kilometre (" + (kmDiff>0?"ortalamanın üstünde":"ortalamanın altında") + ")", kmAdj]);
