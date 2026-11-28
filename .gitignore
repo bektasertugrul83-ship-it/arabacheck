@@ -13,3 +13,5 @@ android/assets/index.html
 *.idsig
 android/assets/ocr/
 desktop/app/ocr/
+android/assets/vendor/
+desktop/app/vendor/

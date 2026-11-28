@@ -12,6 +12,7 @@ rm -rf "$OUT" && mkdir -p "$OUT/classes" "$OUT/dex"
 # Web sayfasının en güncel hâlini uygulamaya kopyala
 cp ../index.html assets/index.html
 rm -rf assets/ocr && cp -r ../ocr assets/ocr
+rm -rf assets/vendor && cp -r ../vendor assets/vendor
 
 "$BT/aapt2" compile --dir res -o "$OUT/res.zip"
 "$BT/aapt2" link -o "$OUT/unsigned.apk" -I "$JAR" --manifest AndroidManifest.xml \

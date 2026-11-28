@@ -284,6 +284,24 @@ kbd{font-family:inherit;font-size:11.5px;font-weight:700;padding:1px 6px;border-
 .ocr-prog{height:6px;border-radius:99px;background:rgba(255,255,255,.12);margin-top:12px;overflow:hidden}
 .ocr-prog i{display:block;height:100%;width:0;background:var(--ice);border-radius:99px;transition:width .3s}
 @media (max-width:560px){.ocr-btn{width:100%;justify-content:center}}
+.ai-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;font-size:13px;color:#9AA9CC;flex-wrap:wrap}
+.ai-row button{color:var(--ice);font-weight:700;font-size:13px;padding:6px 0}
+.ai-row .on{color:#9FF0C9;font-weight:700}
+html.app .ai-row{order:1}
+#ai-dlg{border:0;border-radius:20px;padding:0;margin:auto;inset:0;max-width:min(520px,calc(100vw - 32px));width:100%;box-shadow:var(--shadow);color:var(--ink)}
+#ai-dlg::backdrop{background:rgba(4,10,28,.6)}
+.ai-dlg{padding:22px;display:grid;gap:12px}
+.ai-dlg h3{font-size:19px}
+.ai-dlg p{font-size:14px;color:var(--ink2)}
+.ai-dlg small{font-size:12.5px;color:var(--ink3)}
+.ai-lab{font-size:13px;font-weight:700;color:var(--ink2)}
+.ai-dlg input[type=password]{height:46px;border:1.5px solid var(--line);border-radius:12px;padding:0 14px;font-size:15px;outline:0;width:100%}
+.ai-dlg input[type=password]:focus{border-color:var(--n700)}
+.ai-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.ai-btns .btn-sec{height:44px;padding:0 14px;font-size:13.5px}
+.ai-btns .btn-main{height:44px;padding:0 20px;font-size:14px;width:auto}
+.ai-msg{font-weight:600;min-height:20px}
+.ai-msg.ok{color:var(--good)} .ai-msg.err{color:var(--bad)}
 .f input.filled,.f select.filled{border-color:var(--good);background:#F4FBF8}
 
 /* DEALS */
@@ -576,6 +594,7 @@ html.app #view-history:not(.hidden){display:block;padding-top:14px}
             <label class="btn-w ocr-btn" id="ocr-label"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 8a2 2 0 0 1 2-2h1.5l1.2-1.8A1 1 0 0 1 9.5 4h5a1 1 0 0 1 .8.4L16.5 6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12.5" r="3.5" stroke="currentColor" stroke-width="2"/></svg>Ekran görüntüsünden doldur<input type="file" id="ocr-file" accept="image/*" multiple hidden></label>
           </div>
           <div class="ocr-prog hidden" id="ocr-prog"><i id="ocr-bar"></i></div>
+          <div class="ai-row" id="ai-row"><span id="ai-state"></span><button type="button" id="ai-open">Yapay zekâ ayarı</button></div>
         </div>
 
         <div class="trust">
@@ -908,6 +927,22 @@ html.app #view-history:not(.hidden){display:block;padding-top:14px}
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<dialog id="ai-dlg">
+  <form method="dialog" class="ai-dlg">
+    <h3 class="sora">Yapay zekâ ile ilan okuma</h3>
+    <p>Ekran görüntülerini Claude okur: marka, model, fiyat, km, boya/değişen şeması, Tramer ve satıcının notları. Yazı tanımadan çok daha isabetlidir.</p>
+    <label class="check"><input type="checkbox" id="ai-on"><span class="box"></span>Ekran görüntülerini yapay zekâyla oku</label>
+    <label for="ai-key" class="ai-lab">Anthropic API anahtarı</label>
+    <input id="ai-key" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-...">
+    <small>Anahtarı console.anthropic.com → API Keys bölümünden alın. Anahtar yalnızca bu cihazda saklanır; ekran görüntüleri okunmak üzere Anthropic'e gönderilir. Okuma başına maliyet yaklaşık birkaç sent; sonucu her okumadan sonra gösteriyoruz.</small>
+    <div class="ai-btns">
+      <button type="button" class="btn-sec" id="ai-del">Anahtarı sil</button>
+      <button type="button" class="btn-sec" id="ai-test">Bağlantıyı dene</button>
+      <button type="button" class="btn-main" id="ai-save">Kaydet</button>
+    </div>
+    <p class="ai-msg" id="ai-msg"></p>
+  </form>
+</dialog>
 
 <script>
 /* ================= DATA ================= */
@@ -1531,6 +1566,12 @@ async function fillFromText(){
   if (text.length < 40){ msg.className="err"; msg.textContent = "Metin çok kısa — ilan sayfasının tamamını kopyalayıp yapıştırın."; return; }
   if (/^https?:\/\/\S+$/.test(text)){ $("#link").value = text; $("#paste").value=""; applyLink(); msg.className="err"; msg.textContent = "Bu bir link — şimdi linki açıp sayfanın metnini kopyalayın."; return; }
   pasteBusy = true;
+  if (!sampleFn && aiReady()){
+    msg.className = ""; msg.textContent = "Claude ilanı okuyor…"; $("#btn-paste").disabled = true;
+    try { await aiFill({text}); pasteBusy = false; $("#btn-paste").disabled = false; return; }
+    catch(e){ msg.className = "err"; msg.textContent = aiErrorText(e) + " Yerel okuma kullanılıyor."; }
+    $("#btn-paste").disabled = false;
+  }
   const local = parseListing(text);
   let o = {...local};
   if (sampleFn){
@@ -1587,6 +1628,13 @@ async function fillFromImages(files){
   files = [...files].filter(f => /^image\//.test(f.type) || /\.(png|jpe?g|webp|heic)$/i.test(f.name));
   if (!files.length) return;
   const msg = $("#pb-msg"), lab = $("#ocr-label"), prog = $("#ocr-prog"), bar = $("#ocr-bar");
+  if (aiReady()){
+    lab.classList.add("busy"); prog.classList.remove("hidden"); bar.style.width = "35%";
+    msg.className = ""; msg.textContent = `Claude ilanı okuyor${files.length > 1 ? ` (${files.length} görüntü)` : ""}…`;
+    try { await aiFill({files}); return; }
+    catch(e){ msg.className = "err"; msg.textContent = aiErrorText(e) + " Yazı tanımaya geçiliyor…"; await new Promise(r => setTimeout(r, 1200)); }
+    finally { lab.classList.remove("busy"); prog.classList.add("hidden"); $("#ocr-file").value = ""; }
+  }
   lab.classList.add("busy"); prog.classList.remove("hidden"); bar.style.width = "3%";
   msg.className = ""; msg.textContent = "Yazı tanıma hazırlanıyor…";
   let i = 0;
@@ -1626,6 +1674,161 @@ document.addEventListener("paste", e => {
 });
 $("#paste-box").addEventListener("dragover", e => { if ([...e.dataTransfer.items].some(x => x.kind === "file")) e.preventDefault(); });
 $("#paste-box").addEventListener("drop", e => { if (e.dataTransfer.files.length){ e.preventDefault(); fillFromImages(e.dataTransfer.files); } });
+
+/* ================= YAPAY ZEKÂ İLE İLAN OKUMA (Claude, kullanıcının kendi API anahtarıyla) ================= */
+const AI_KEY = "arabacheck:apikey", AI_ON = "arabacheck:aion";
+const lsGet = k => { try { return localStorage.getItem(k); } catch { return null; } };
+const lsSet = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} };
+const aiKey = () => lsGet(AI_KEY) || "";
+const aiOnPref = () => lsGet(AI_ON) !== "0";
+const aiReady = () => !!aiKey() && aiOnPref();
+const AI_MODEL = "claude-opus-5-5";
+const AI_PRICE = {in: 4 / 1e6, out: 20 / 1e6}; // Claude Opus 5.5, $ / token
+let sdkLoading = null;
+function loadSdk(){
+  if (window.Anthropic) return Promise.resolve(window.Anthropic);
+  if (!sdkLoading) sdkLoading = loadScript("vendor/anthropic-sdk.js").then(() => window.Anthropic).catch(e => { sdkLoading = null; throw e; });
+  return sdkLoading;
+}
+async function aiClient(){
+  const Anthropic = await loadSdk();
+  // Anahtar kullanıcının kendi cihazında; istek doğrudan Anthropic'e gider
+  return new Anthropic({ apiKey: aiKey(), dangerouslyAllowBrowser: true, maxRetries: 1, timeout: 120000 });
+}
+const nul = t => ({anyOf: [t, {type: "null"}]});
+const AI_SCHEMA = {
+  type: "object", additionalProperties: false,
+  properties: {
+    marka: nul({type: "string"}), seri: nul({type: "string", description: "Model/seri adı, ör. Passat, C Serisi, SLK, Corolla"}),
+    paket: nul({type: "string", description: "Motor ve donanım, ör. 1.5 TSI Business, SLK 200 Kompressor"}),
+    yil: nul({type: "integer"}), km: nul({type: "integer"}), fiyatTL: nul({type: "integer"}),
+    yakit: nul({type: "string", enum: ["Benzin","Dizel","LPG","Hibrit","Elektrik"]}),
+    vites: nul({type: "string", enum: ["Manuel","Otomatik","Yarı Otomatik"]}),
+    satici: nul({type: "string", enum: ["Sahibinden","Galeriden","Yetkili bayiden"]}),
+    sahip: nul({type: "integer"}), tramerTL: nul({type: "integer"}),
+    boyaBolumuGorunuyor: {type: "boolean", description: "Boya/değişen şeması veya listesi görüntülerde var mı"},
+    boyaliParcalar: {type: "array", items: {type: "string"}}, lokalBoyaliParcalar: {type: "array", items: {type: "string"}},
+    degisenParcalar: {type: "array", items: {type: "string"}},
+    agirHasarKayitli: nul({type: "boolean"}), servisBakimli: nul({type: "boolean"}),
+    motorHacmiCC: nul({type: "integer"}), motorGucuHP: nul({type: "integer"}), yakitTuketimi: nul({type: "number"}),
+    sunroof: nul({type: "boolean"}), adaptifHizSabitleyici: nul({type: "boolean"}), geriGorusKamerasi: nul({type: "boolean"}),
+    onemliNotlar: {type: "array", items: {type: "string"}, description: "Alıcı için önemli satıcı notları (en fazla 4, kısa): yapılan bakımlar, hasar açıklaması, kusurlar"}
+  },
+  required: ["marka","seri","paket","yil","km","fiyatTL","yakit","vites","satici","sahip","tramerTL","boyaBolumuGorunuyor","boyaliParcalar","lokalBoyaliParcalar","degisenParcalar","agirHasarKayitli","servisBakimli","motorHacmiCC","motorGucuHP","yakitTuketimi","sunroof","adaptifHizSabitleyici","geriGorusKamerasi","onemliNotlar"]
+};
+const AI_INSTR = `Bunlar Türkiye'deki bir ikinci el araç ilanının (sahibinden.com, arabam.com vb.) ekran görüntüleri veya metni. Yalnızca ilanda açıkça görünen bilgileri çıkar; görünmeyen alanlar null olsun, tahmin yürütme.
+- Fiyat ve Tramer TL tutarını tam sayı olarak yaz (1.385.000 TL → 1385000).
+- Boya/değişen: araba şemasındaki renkleri ve parça listesini oku. "Lokal boyalı" parçaları lokalBoyaliParcalar'a, "boyalı" olanları boyaliParcalar'a, "değişmiş/değişen" olanları degisenParcalar'a yaz. Bu bölüm hiç görünmüyorsa boyaBolumuGorunuyor=false ve listeler boş.
+- "Ağır Hasar Kayıtlı: Evet" ise agirHasarKayitli=true; "Hayır" ise false.
+- onemliNotlar: alıcının bilmesi gereken kısa notlar (yapılan bakımlar, kusurlar, hasar açıklaması); yoksa boş liste.`;
+async function fileToImageBlock(file){
+  // Uzun kenarı 1568 piksele indir, JPEG olarak gönder (daha hızlı ve ucuz; metin okunaklı kalır)
+  const bmp = await createImageBitmap(file);
+  const sc = Math.min(1, 1568 / Math.max(bmp.width, bmp.height));
+  const cv = document.createElement("canvas"); cv.width = Math.round(bmp.width * sc); cv.height = Math.round(bmp.height * sc);
+  cv.getContext("2d").drawImage(bmp, 0, 0, cv.width, cv.height);
+  const data = cv.toDataURL("image/jpeg", 0.85).split(",")[1];
+  return {type: "image", source: {type: "base64", media_type: "image/jpeg", data}};
+}
+function aiErrorText(e){
+  const A = window.Anthropic;
+  if (A && e instanceof A.AuthenticationError) return "API anahtarı geçersiz. Yapay zekâ ayarından kontrol edin.";
+  if (A && e instanceof A.PermissionDeniedError) return "Bu anahtarın Claude'a erişim izni yok.";
+  if (A && e instanceof A.RateLimitError) return "Kullanım sınırına ulaşıldı veya bakiye yetersiz; biraz sonra deneyin.";
+  if (A && e instanceof A.APIConnectionError) return "Claude'a bağlanılamadı; internet bağlantınızı kontrol edin.";
+  if (A && e instanceof A.APIError) return `Claude hatası (${e.status || "?"}).`;
+  if (e && e.code === "refusal") return "Claude bu isteği yanıtlamadı.";
+  return "Yapay zekâ okuması başarısız oldu.";
+}
+async function claudeReadListing({files = [], text = ""}){
+  const client = await aiClient();
+  const content = [];
+  for (const f of files) content.push(await fileToImageBlock(f));
+  content.push({type: "text", text: AI_INSTR + (text ? "\n\nİLAN METNİ:\n" + text.slice(0, 20000) : "")});
+  const res = await client.beta.messages.create({
+    model: AI_MODEL, max_tokens: 8000,
+    betas: ["server-side-fallback-2026-07-01"], fallbacks: "default",   // güvenlik filtresi yanlışlıkla reddederse başka modelle yeniden dener
+    output_config: {effort: "low", format: {type: "json_schema", schema: AI_SCHEMA}},
+    messages: [{role: "user", content}]
+  });
+  if (res.stop_reason === "refusal"){ const er = new Error("refusal"); er.code = "refusal"; throw er; }
+  const block = res.content.find(b => b.type === "text");
+  const v = JSON.parse(block ? block.text : "{}");
+  const u = res.usage || {};
+  const cost = (u.input_tokens || 0) * AI_PRICE.in + (u.output_tokens || 0) * AI_PRICE.out;
+  return {v, cost};
+}
+function aiToParsed(v){
+  const o = {};
+  if (v.marka) o.brand = findBrand(v.marka) || String(v.marka);
+  if (v.seri){ o.model = String(v.seri); if (o.brand && DB[o.brand]){ const fm = findModel(o.brand, o.model); if (fm) o.model = fm; } }
+  if (v.paket) o.engine = String(v.paket);
+  if (v.yil > 1950 && v.yil <= NOW_YEAR + 1) o.year = String(v.yil);
+  if (v.km != null && v.km >= 0 && v.km < 2000000) o.km = v.km;
+  if (v.fiyatTL > 10000 && v.fiyatTL < 300000000) o.price = v.fiyatTL;
+  if (v.yakit) o.fuel = v.yakit;
+  if (v.vites) o.gear = v.vites;
+  if (v.satici) o.seller = v.satici;
+  if (v.sahip >= 1) o.owners = Math.min(4, v.sahip);
+  if (v.tramerTL != null && v.tramerTL >= 0) o.tramer = v.tramerTL;
+  if (v.boyaBolumuGorunuyor){
+    o.painted = Math.min(10, (v.boyaliParcalar || []).length + (v.lokalBoyaliParcalar || []).length);
+    o.changed = Math.min(8, (v.degisenParcalar || []).length);
+  }
+  if (v.agirHasarKayitli === true) o.accident = "pert";
+  if (typeof v.servisBakimli === "boolean") o.service = v.servisBakimli;
+  if (v.motorHacmiCC >= 600 && v.motorHacmiCC <= 8000) o.cc = v.motorHacmiCC;
+  if (v.motorGucuHP >= 40 && v.motorGucuHP <= 1500) o.hp = v.motorGucuHP;
+  if (v.yakitTuketimi > 1 && v.yakitTuketimi < 30) o.cons = v.yakitTuketimi;
+  if (v.sunroof) o.sunroof = true;
+  if (v.adaptifHizSabitleyici) o.acc = true;
+  if (v.geriGorusKamerasi) o.camera = true;
+  return o;
+}
+const usdText = c => c < 0.01 ? "< $0,01" : "≈ $" + c.toFixed(2).replace(".", ",");
+async function aiFill({files, text}){
+  const msg = $("#pb-msg");
+  const {v, cost} = await claudeReadListing({files, text});
+  const o = aiToParsed(v);
+  const done = applyParsed(o);
+  const need = ["brand","model","year","km"].filter(k => o[k] == null || o[k] === "");
+  const names = {brand:"marka", model:"model", year:"yıl", km:"kilometre"};
+  const notes = (v.onemliNotlar || []).slice(0, 4);
+  msg.className = need.length ? "" : "ok";
+  msg.innerHTML = `✓ Claude okudu (${usdText(cost)}): ${done.length} alan — ${esc(done.join(", "))}` + (need.length ? ` — eksik: ${need.map(k=>names[k]).join(", ")}` : "") +
+    (notes.length ? `<br><b>Satıcı notları:</b> ${notes.map(esc).join(" · ")}` : "");
+  $("#form-anchor").scrollIntoView({behavior: "smooth"});
+  return done.length;
+}
+function aiRenderState(){
+  const st = $("#ai-state"); if (!st) return;
+  if (window.__acSample){ st.innerHTML = `<span class="on">● Yapay zekâ açık</span> (claude.ai)`; $("#ai-open").classList.add("hidden"); return; }
+  st.innerHTML = aiReady() ? `<span class="on">● Yapay zekâ ile okuma açık</span>` : aiKey() ? "Yapay zekâ kapalı — yazı tanıma kullanılıyor" : "Daha isabetli okuma için yapay zekâyı açın";
+}
+$("#ai-open").addEventListener("click", () => {
+  $("#ai-key").value = aiKey(); $("#ai-on").checked = aiOnPref(); $("#ai-msg").textContent = ""; $("#ai-msg").className = "ai-msg";
+  $("#ai-dlg").showModal();
+});
+$("#ai-save").addEventListener("click", () => {
+  const k = $("#ai-key").value.trim();
+  if (k && !/^sk-ant-/.test(k)){ $("#ai-msg").className = "ai-msg err"; $("#ai-msg").textContent = "Anahtar \"sk-ant-\" ile başlamalı."; return; }
+  lsSet(AI_KEY, k || null); lsSet(AI_ON, $("#ai-on").checked ? "1" : "0");
+  aiRenderState(); $("#ai-dlg").close(); toast(k ? "Yapay zekâ ayarı kaydedildi" : "Anahtar kaldırıldı");
+});
+$("#ai-del").addEventListener("click", () => { lsSet(AI_KEY, null); $("#ai-key").value = ""; aiRenderState(); $("#ai-msg").className = "ai-msg"; $("#ai-msg").textContent = "Anahtar bu cihazdan silindi."; });
+$("#ai-test").addEventListener("click", async () => {
+  const m = $("#ai-msg"), k = $("#ai-key").value.trim();
+  if (!k){ m.className = "ai-msg err"; m.textContent = "Önce anahtarı girin."; return; }
+  const prev = aiKey(); lsSet(AI_KEY, k);
+  m.className = "ai-msg"; m.textContent = "Deneniyor…";
+  try {
+    const client = await aiClient();
+    await client.models.retrieve(AI_MODEL);   // jeton harcamadan anahtarı doğrular
+    m.className = "ai-msg ok"; m.textContent = "✓ Bağlantı başarılı. Kaydet'e basın.";
+  } catch(e){ m.className = "ai-msg err"; m.textContent = aiErrorText(e); }
+  finally { lsSet(AI_KEY, prev || null); }
+});
+setTimeout(aiRenderState, 0);
 
 /* ================= GERÇEK İLANLARLA KALİBRASYON ================= */
 // Yapıştırılan metinden ilanları çıkar: her fiyatın etrafındaki satırlardan km ve yıl
@@ -1924,7 +2127,7 @@ function finish(c, a){
 let sampleFn = null;
 try {
   if (window.claude && typeof window.claude.use === "function") {
-    window.claude.use("sample").then(s => { if (s){ sampleFn = s; $("#ai-wrap").classList.remove("hidden"); } }).catch(()=>{});
+    window.claude.use("sample").then(s => { if (s){ sampleFn = s; window.__acSample = true; $("#ai-wrap").classList.remove("hidden"); aiRenderState(); } }).catch(()=>{});
   }
 } catch {}
 let aiOn = true;
