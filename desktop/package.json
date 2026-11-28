@@ -1,7 +1,7 @@
 {
   "name": "arabacheck",
   "productName": "ArabaCheck",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "İkinci el araç analizi",
   "main": "app/main.js",
   "private": true,

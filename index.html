@@ -284,6 +284,10 @@ kbd{font-family:inherit;font-size:11.5px;font-weight:700;padding:1px 6px;border-
 .ocr-prog{height:6px;border-radius:99px;background:rgba(255,255,255,.12);margin-top:12px;overflow:hidden}
 .ocr-prog i{display:block;height:100%;width:0;background:var(--ice);border-radius:99px;transition:width .3s}
 @media (max-width:560px){.ocr-btn{width:100%;justify-content:center}}
+.br-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.br-row .br-btn{flex:1 1 200px;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:46px;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.22)}
+.br-row small{flex:1 1 100%;font-size:12.5px;color:#9AA9CC}
+html.app .br-row{order:-2;margin:0 0 12px}
 .ai-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;font-size:13px;color:#9AA9CC;flex-wrap:wrap}
 .ai-row button{color:var(--ice);font-weight:700;font-size:13px;padding:6px 0}
 .ai-row .on{color:#9FF0C9;font-weight:700}
@@ -594,6 +598,11 @@ html.app #view-history:not(.hidden){display:block;padding-top:14px}
             <label class="btn-w ocr-btn" id="ocr-label"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 8a2 2 0 0 1 2-2h1.5l1.2-1.8A1 1 0 0 1 9.5 4h5a1 1 0 0 1 .8.4L16.5 6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12.5" r="3.5" stroke="currentColor" stroke-width="2"/></svg>Ekran görüntüsünden doldur<input type="file" id="ocr-file" accept="image/*" multiple hidden></label>
           </div>
           <div class="ocr-prog hidden" id="ocr-prog"><i id="ocr-bar"></i></div>
+          <div class="br-row hidden" id="br-row">
+            <button type="button" class="btn-w br-btn" data-br="https://www.sahibinden.com/kategori/otomobil"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>sahibinden'de ilan seç</button>
+            <button type="button" class="btn-w br-btn" data-br="https://www.arabam.com/ikinci-el/otomobil"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>arabam'da ilan seç</button>
+            <small>İlanı açın, alttaki <b>"Bu ilanı analiz et"</b> düğmesine basın. Telefonda sahibinden/arabam uygulamasında <b>Paylaş → ArabaCheck</b> de olur.</small>
+          </div>
           <div class="ai-row" id="ai-row"><span id="ai-state"></span><button type="button" id="ai-open">Yapay zekâ ayarı</button></div>
         </div>
 
@@ -1344,8 +1353,8 @@ function applyLink(){
   }
   $("#paste-box").scrollIntoView({behavior:"smooth", block:"center"});
 }
-$("#btn-link").addEventListener("click", applyLink);
-$("#link").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); applyLink(); }});
+$("#btn-link").addEventListener("click", () => { applyLink(); const v = $("#link").value.trim(); if (v && isListingUrl(v)) openListing(v, true); });
+$("#link").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); $("#btn-link").click(); }});
 $("#link").addEventListener("paste", ()=>setTimeout(applyLink, 50));
 
 /* ================= İLAN METNİNDEN TAM DOLDURMA ================= */
@@ -1674,6 +1683,41 @@ document.addEventListener("paste", e => {
 });
 $("#paste-box").addEventListener("dragover", e => { if ([...e.dataTransfer.items].some(x => x.kind === "file")) e.preventDefault(); });
 $("#paste-box").addEventListener("drop", e => { if (e.dataTransfer.files.length){ e.preventDefault(); fillFromImages(e.dataTransfer.files); } });
+
+/* ================= UYGULAMA İÇİ TARAYICI VE PAYLAŞIM ================= */
+const brBridge = () => (window.ArabaCheckApp && typeof ArabaCheckApp.openBrowser === "function") ? (u, a) => ArabaCheckApp.openBrowser(u, !!a)
+  : (window.ArabaCheckDesktop && typeof ArabaCheckDesktop.openBrowser === "function") ? (u, a) => ArabaCheckDesktop.openBrowser(u, !!a) : null;
+const isListingUrl = u => /(^|\.)(sahibinden\.com|arabam\.com|shbd\.io)$/i.test((() => { try { return new URL(u).hostname; } catch { return ""; } })());
+function openListing(url, auto){ const b = brBridge(); if (!b) return false; b(url, auto); return true; }
+if (brBridge()){
+  $("#br-row").classList.remove("hidden");
+  const sub = $(".app-sub"); if (sub) sub.textContent = "İlanı sahibinden veya arabam'da seçin, ya da o uygulamada Paylaş → ArabaCheck deyin; bilgiler otomatik dolsun.";
+  setTimeout(() => { const h = $(".pb-head span"); if (h) h.textContent = "Linki yapıştırıp Doldur'a basın: ilan uygulamanın içinde açılıp okunur."; }, 0);
+  $$("[data-br]").forEach(el => el.addEventListener("click", () => openListing(el.dataset.br, false)));
+}
+// Tarayıcıdan ya da paylaşım menüsünden gelen ilan yazısı
+window.acReceiveListing = async function(text, url){
+  if (!text || text.trim().length < 40){ toast("İlandan okunacak yazı gelmedi"); return; }
+  resetForm(); goHome();
+  if (url){ $("#link").value = url; $("#pb-open").href = url; $("#pb-open").classList.remove("hidden"); }
+  $("#paste").value = text.slice(0, 60000);
+  $("#paste-box").scrollIntoView({behavior: "smooth", block: "center"});
+  await fillFromText();
+};
+// Paylaşım menüsünden gelen ekran görüntüleri (Android: /shared/<n>)
+window.acReceiveImages = async function(n){
+  try {
+    const files = [];
+    for (let i = 0; i < n; i++){
+      const r = await fetch(`/shared/${i}`); if (!r.ok) continue;
+      const b = await r.blob(); files.push(new File([b], `paylasim-${i + 1}.jpg`, {type: b.type || "image/jpeg"}));
+    }
+    if (!files.length){ toast("Paylaşılan görüntü okunamadı"); return; }
+    resetForm(); goHome();
+    $("#paste-box").scrollIntoView({behavior: "smooth", block: "center"});
+    await fillFromImages(files);
+  } catch(e){ toast("Paylaşılan görüntü okunamadı"); }
+};
 
 /* ================= YAPAY ZEKÂ İLE İLAN OKUMA (Claude, kullanıcının kendi API anahtarıyla) ================= */
 const AI_KEY = "arabacheck:apikey", AI_ON = "arabacheck:aion";

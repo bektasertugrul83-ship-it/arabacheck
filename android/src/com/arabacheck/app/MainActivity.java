@@ -26,8 +26,14 @@ public class MainActivity extends Activity {
     private static final String HOST = "appassets.androidplatform.net";
     private static final String START_URL = "https://" + HOST + "/index.html?app=1";
     private static final int PICK_IMAGES = 41;
+    public static final String EXTRA_LISTING_TEXT = "listing_text";
+    public static final String EXTRA_LISTING_URL = "listing_url";
     private WebView web;
     private ValueCallback<Uri[]> fileCallback;
+    private boolean pageReady = false;
+    private String pendingJs = null;
+    /** Paylaşılan ekran görüntüleri; sayfa bunları /shared/<n> adresinden okur. */
+    private final java.util.List<Uri> sharedUris = new java.util.ArrayList<>();
 
     private static String mime(String path) {
         if (path.endsWith(".html")) return "text/html";
@@ -44,6 +50,12 @@ public class MainActivity extends Activity {
         public void copy(String text) {
             ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             if (cm != null) cm.setPrimaryClip(ClipData.newPlainText("ArabaCheck", text));
+        }
+
+        /** İlanı uygulama içi tarayıcıda aç; ilan sayfasıysa yüklenince kendiliğinden okunur. */
+        @JavascriptInterface
+        public void openBrowser(String url, boolean auto) {
+            runOnUiThread(() -> openListingBrowser(url, auto));
         }
 
         /** Rapor özetini Android paylaşım menüsüyle gönder (WhatsApp, SMS…). */
@@ -139,6 +151,19 @@ public class MainActivity extends Activity {
                 if (!HOST.equals(u.getHost())) return null;
                 String path = u.getPath();
                 if (path == null || path.equals("/")) path = "/index.html";
+                if (path.startsWith("/shared/")) {
+                    try {
+                        Uri su = sharedUris.get(Integer.parseInt(path.substring(8)));
+                        String type = getContentResolver().getType(su);
+                        WebResourceResponse r = new WebResourceResponse(type != null ? type : "image/jpeg", null, getContentResolver().openInputStream(su));
+                        java.util.Map<String, String> h = new java.util.HashMap<>();
+                        h.put("Access-Control-Allow-Origin", "*");
+                        r.setResponseHeaders(h);
+                        return r;
+                    } catch (Exception e) {
+                        return new WebResourceResponse("text/plain", "utf-8", 404, "Not Found", null, null);
+                    }
+                }
                 try {
                     WebResourceResponse r = new WebResourceResponse(mime(path), null, getAssets().open(path.substring(1)));
                     java.util.Map<String, String> h = new java.util.HashMap<>();
@@ -152,6 +177,10 @@ public class MainActivity extends Activity {
 
             @Override
             public void onPageFinished(WebView view, String url) {
+                if (!pageReady) {
+                    pageReady = true;
+                    if (pendingJs != null) { final String js = pendingJs; pendingJs = null; view.postDelayed(() -> view.evaluateJavascript(js, null), 300); }
+                }
                 view.evaluateJavascript(
                     "(function(){try{var w=function(t){ArabaCheckApp.copy(String(t));return Promise.resolve();};" +
                     "if(navigator.clipboard){navigator.clipboard.writeText=w;}" +
@@ -183,6 +212,59 @@ public class MainActivity extends Activity {
 
         if (savedInstanceState != null) web.restoreState(savedInstanceState);
         else web.loadUrl(START_URL);
+        handleIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleIntent(intent);
+    }
+
+    /** Paylaşım menüsünden gelen link / metin / ekran görüntüleri ve ilan tarayıcısından dönen yazı. */
+    private void handleIntent(Intent in) {
+        if (in == null) return;
+        String listing = in.getStringExtra(EXTRA_LISTING_TEXT);
+        if (listing != null) {
+            in.removeExtra(EXTRA_LISTING_TEXT);
+            String u = in.getStringExtra(EXTRA_LISTING_URL);
+            runInPage("acReceiveListing(" + org.json.JSONObject.quote(listing) + "," + org.json.JSONObject.quote(u == null ? "" : u) + ")");
+            return;
+        }
+        String action = in.getAction();
+        String type = in.getType();
+        if (Intent.ACTION_SEND.equals(action) && type != null && type.startsWith("text/")) {
+            String text = in.getStringExtra(Intent.EXTRA_TEXT);
+            in.setAction(null);
+            if (text == null) return;
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("https?://\\S+").matcher(text);
+            if (m.find()) openListingBrowser(m.group(), true);
+            else runInPage("acReceiveListing(" + org.json.JSONObject.quote(text) + ",'')");
+        } else if ((Intent.ACTION_SEND.equals(action) || Intent.ACTION_SEND_MULTIPLE.equals(action)) && type != null && type.startsWith("image/")) {
+            sharedUris.clear();
+            if (Intent.ACTION_SEND.equals(action)) {
+                Uri u = in.getParcelableExtra(Intent.EXTRA_STREAM);
+                if (u != null) sharedUris.add(u);
+            } else {
+                java.util.ArrayList<Uri> list = in.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+                if (list != null) for (Uri u : list) { if (u != null && sharedUris.size() < 6) sharedUris.add(u); }
+            }
+            in.setAction(null);
+            if (!sharedUris.isEmpty()) runInPage("acReceiveImages(" + sharedUris.size() + ")");
+        }
+    }
+
+    private void runInPage(String js) {
+        if (pageReady) web.evaluateJavascript(js, null);
+        else pendingJs = js;
+    }
+
+    private void openListingBrowser(String url, boolean auto) {
+        Intent b = new Intent(this, BrowserActivity.class);
+        b.putExtra(BrowserActivity.EXTRA_URL, url);
+        b.putExtra(BrowserActivity.EXTRA_AUTO, auto);
+        startActivity(b);
     }
 
     /** Yedek: linki doğrudan varsayılan tarayıcıda aç. */
